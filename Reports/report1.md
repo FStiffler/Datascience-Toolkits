@@ -3,7 +3,7 @@
 ## Task 1: Data
 
 The provided MNIST dataset is a subset of a large NIST database, containing handwritten digits and divided into 4 separate files with both images and labels sets:
-a training set of 60,000 examples and a test set of 10,000 examples. 
+a training set of 60,000 examples and a test set of 10,000 examples.
 
 
 The database was formed from two Special Databases (NIST's 3 and 1), with the former reported to be much cleaner due to the difference in study subjects' differences.
@@ -37,7 +37,10 @@ The code base which was assigned to us can be found [here](https://github.com/ke
 $ wget https://github.com/keras-team/keras-io/blob/master/examples/vision/mnist_convnet.py
 
 ```
-The file is stored in the local root folder of the our repository as **mnist_convnet.py**. The file is only stored to the root folder of the previously created **Milestone1** branch. The **master** branch stays unaffected. The next step is to commit and push the file to the same branch on the remote repo on Github.
+
+However, we recognized that we simply downloaded the source code of the Github page with this linux command. To actually download the python file with actual code python code, we had to click on *Raw* on the Github page and copy the URL of the new window. After that we could rerun the command above with the now correct URL.
+
+The python file was stored in the local root folder of the our repository as *mnist_convnet.py*. The file was only stored to the root folder of the previously created *Milestone1* branch. The *master* branch stayed unaffected. The next step was to commit and push the file to the same branch on the remote repo on Github.
 
 ## Task 3: Commit
 
@@ -64,3 +67,5 @@ Finally, the file is pushed to the remote repo on Github:
 $ git push
 
 ```
+
+## Task 4: Run code
