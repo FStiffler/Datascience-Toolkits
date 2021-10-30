@@ -149,4 +149,48 @@ $ pip3 show <library>
 
 If we use this command for the keras and numpy library, we see that both libraries, are required by tensorflow but do not require furher packages. Tensorflow itself requires several packages which are installed right away when tensorflow itself is installed.
 
-The library versions depend on the system. When we ran the same code on a windows computer with an anaconda distribution and python version 3.7.11, we saw differences in the library versions. However, as long as a python versions 3.6 - 3.9 are used and pip versions >= 19.0, tensorflow can be installed normally and we can run the file from the terminal. 
+The library versions depend on the system. When we ran the same code on a windows computer with an anaconda distribution and python version 3.7.11, we saw differences in the library versions. However, as long as a python versions 3.6 - 3.9 are used and pip versions >= 19.0, tensorflow can be installed normally and we can run the file from the terminal.
+
+
+### Task 5: What the code does
+
+Dependencies that must be imported before running the could could be checked for by running the following command:
+
+$ pip show keras
+$ pip show tensorflow
+
+By checking for pre-required dependencies, one finds that keras package runs on version 2.6.0, and itself is required by the tensorflow package, despite having no additional requirements of its own.
+Tensorflow package, on the other hand, also runs on 2.6.0 version, and is an open source machine learning framework for everyone, and has a rather wide list of required pre-installed packages to run:
+
+wrapt 1.12.1   
+gast 0.4.0
+astunparse 1.6.3
+h5py 3.1.0
+numpy 1.19.5
+protobuf 3.19.1
+flatbuffers 1.12
+opt-einsum 3.3.0
+tensorflow-estimator 2.6.0
+typing-extensions 3.7.4.3
+tensorboard 2.7.0
+keras-preprocessing 1.1.2
+six 1.15.0
+google-pasta 0.2.0
+wheel 0.36.2
+clang 5.0
+absl-py 0.15.0
+grpcio 1.41.1
+keras 2.6.0
+termcolor 1.1.0
+
+The indicated versions of each of these required packages could be checked by running the command
+
+$ pip3 list
+
+which produces the complete list of packages and their respective versions that go together with tensorflow and/or keras.
+
+Having run the code command, one receives a message about automatic dowloadig of data from both tensorflow and keras storagespaces in googleapis. The technical details of the training process are also displayed, e.g. the X train shape (60000, 28, 28, 1), where 60,000 stands for the 60 thousand training samples, and double 28 represents the 28*28 field in which images are centered. Tensorflow also specifies that the code is being run with tensorflow binary, which was optimized with Deep Neural Network Library.
+
+The model at issue is sequential, with the outcome being reported tabularly with 3 columns, those being being named layer (type), output shape, and param #. The number of total params and those that have been found to be trainable equals in both cases 34,826, thus allowing to conclude that all paramaters are valid for training.
+
+There were reported 15 epochs, with each following a rapid downward trend of loss numbers, while showing a general (although with insignificant exceptions) upward trend in both accuracy and val_accuracy figures. To be more precise, the first epoch reported 0.3812 loss, while the last 15th epoch showed only 0.0324. As to the accuracy numbers, the val_accuracy figures were set equal to 0.9783, differentiating by almost 0.02 point from the 0.9918 in the 15th epoch. Overall, the test loss numbers were rounded up at 0.0255, and the test accuracy figures showed 0.9919.
