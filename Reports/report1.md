@@ -156,10 +156,15 @@ The library versions depend on the system. When we ran the same code on a window
 
 Dependencies that must be imported before running the could could be checked for by running the following command:
 
+```sh
+
 $ pip show keras
 $ pip show tensorflow
 
+```
+
 By checking for pre-required dependencies, one finds that keras package runs on version 2.6.0, and itself is required by the tensorflow package, despite having no additional requirements of its own.
+
 Tensorflow package, on the other hand, also runs on 2.6.0 version, and is an open source machine learning framework for everyone, and has a rather wide list of required pre-installed packages to run:
 
 wrapt 1.12.1   
@@ -185,7 +190,11 @@ termcolor 1.1.0
 
 The indicated versions of each of these required packages could be checked by running the command
 
+``` sh
+
 $ pip3 list
+
+```
 
 which produces the complete list of packages and their respective versions that go together with tensorflow and/or keras.
 
