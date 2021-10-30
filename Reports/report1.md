@@ -2,13 +2,13 @@
 
 ## Task 1: Data
 
-The provided MNIST dataset is a subset of a large NIST database, containing handwritten digits and divided into 4 separate files with both images and labels sets:
-a training set of 60,000 examples and a test set of 10,000 examples.
+The provided MNIST dataset is a subset of a large MNIST database, containing handwritten digits and divided into 4 separate files with both images and labels sets:
+
+A training set of 60,000 examples and a test set of 10,000 examples.
 
 
 The database was formed from two Special Databases (NIST's 3 and 1), with the former reported to be much cleaner due to the difference in study subjects' differences.
-Merging the databases into a single one was crucial for drawing valid conclusions from the learning experiments conducted,
- while also having two independent sets of samples - i.e. training and test sets.
+Merging the databases into a single one was crucial for drawing valid conclusions from the learning experiments conducted, while also having two independent sets of samples - i.e. training and test sets.
 
 
 The file format constitutes original bilevel images, normalized to a 20x20 pixel box with their aspect ratio preserved;
@@ -38,13 +38,13 @@ $ wget https://github.com/keras-team/keras-io/blob/master/examples/vision/mnist_
 
 ```
 
-However, we recognized that we simply downloaded the source code of the Github page with this linux command. To actually download the python file with actual code python code, we had to click on *Raw* on the Github page and copy the URL of the new window. After that we could rerun the command above with the now correct URL.
+However, we recognized that we simply downloaded the source code of the Github page with this linux command. To actually download the python file with actual python code, we had to click on *Raw* on the Github page and copy the URL of the new webbrowser window. After that we reran the command above with the now correct URL.
 
-The python file was stored in the local root folder of the our repository as *mnist_convnet.py*. The file was only stored to the root folder of the previously created *Milestone1* branch. The *master* branch stayed unaffected. The next step was to commit and push the file to the same branch on the remote repo on Github.
+The python file was stored in the local root folder of the our repository as *mnist_convnet.py*. The file was only stored in the root folder of the previously created *Milestone1* branch. The *master* branch stayed unaffected in this process. The next step was to commit and push the file to the same branch on the remote repo on Github.
 
 ## Task 3: Commit
 
-The downloaded file has staged first before we can commit it:
+The downloaded file had to be staged first before we could commit it:
 
 ```sh
 
@@ -52,7 +52,7 @@ $ git add mnist_convnet.py
 
 ```
 
-Then the file can be committed to our local repository with the command:
+Then the file was committed to our local repository with the command:
 
 ```sh
 
@@ -60,7 +60,7 @@ $ git commit -m <commit_message>
 
 ```
 
-Finally, the file is pushed to the remote repo on Github:
+Finally, the file was pushed to the remote repo on Github:
 
 ```sh
 
@@ -70,9 +70,9 @@ $ git push
 
 ## Task 4: Run code
 
-### Task 4.1: Necessary steps to run the code
+### Necessary steps to run the code
 
-To run the code, first we had to activate our virtual python environment (if a virtual environment was set up for this project). To activate the environment with have to use the following command:
+To run the code, first we had to activate our virtual python environment (if a virtual environment was even set up for this project). To activate the environment, the following command had to be used:
 
 ```sh
 
@@ -80,7 +80,7 @@ $ source <env_name>/bin/activate
 
 ```
 
-When the python evironment is active, we can start installing libraries required for the project (In this case, required to run the *mnist_convnet.py* file) into this environment. If we do not do that, the file will not run due to missing dependencies. To install libraries we need pip allowing us to access python libraries from the python package index (PyPI). If pip is not already installed, we can do so with the following linux command:
+After the environment was activated, we started installing libraries required to run the *mnist_convnet.py* file. Without the libraries, the file does not run properly and returns an error. To install libraries, we needed pip which allows access to libraries from the python package index (PyPI). To install pip, the following command was used:
 
 ```sh
 
@@ -88,7 +88,7 @@ $ sudo apt-get install -y python3-pip
 
 ```
 
-We can verify the installation:
+We verfied the installation with:
 
 ```sh
 
@@ -96,7 +96,7 @@ $ pip3 --version
 
 ```
 
-If pip is already installed but we want to make sure that it is the latest version we can use the command:
+Some of us had pip already installed. But it was important to have the latest version. To achieve that, the following command was used:
 
 ```sh
 
@@ -104,14 +104,14 @@ $ pip3 install --upgrade pip
 
 ```
 
-Now with pip available, we can install the required libraries:
+Now with pip available, we installed the required libraries directly into our virtual environments:
 
 ```sh
 
 $ pip3 install tensorflow
 
 ```
- In the file three libaries are imported, namely *tensorflow*, *keras* and *numpy*. The library tensorflow also contains the keras API which is why, a separate installation of keras is not necessary. The numpy library comes with the tensorflow distribution as well. We can check if all required libraries are available by looking at the list of installed packages:
+ The *mnist_convnet.py* indicates that three libraries are about to be used, namely *tensorflow*, *keras* and *numpy*. The library tensorflow contains the keras API which is why, a separate installation of keras was not necessary. The numpy library comes with the tensorflow distribution as well. We checked if all required libraries were available by looking at the list of installed packages:
 
  ```sh
 
@@ -119,7 +119,7 @@ $ pip3 install tensorflow
 
  ```
 
-Now that everything is ready, we can run the file:
+After everything was ready, we ran the python file:
 
 ```sh
 
@@ -127,11 +127,11 @@ $ python3 mnist_convnet.py
 
 ```
 
-Because the code initiates the training of a neural network model, the process takes some time to complete.
+Because the code initiates the training of a neural network model, the process took some time to complete but completed successfully in the end.
 
-### Task 4.2: Versions and Dependencies
+### Versions and Dependencies
 
-To see the python version which is used to run the code we can use the command:
+To see the python version which is used to run the code we used the command:
 
 ```sh
 
@@ -139,7 +139,7 @@ $ python3 --version
 
 ```
 
-The versions of the three libraries tensorflow, keras and numpy are depicted in the list already called before. To see the dependencies of each library we can use the command:
+The versions of the three libraries tensorflow, keras and numpy are depicted in the same list as mentioned above. To see the dependencies of each library we used the command:
 
 ```sh
 
@@ -147,9 +147,9 @@ $ pip3 show <library>
 
 ```
 
-If we use this command for the keras and numpy library, we see that both libraries, are required by tensorflow but do not require furher packages. Tensorflow itself requires several packages which are installed right away when tensorflow itself is installed.
+When we used this command for the keras and numpy library, we saw that both libraries, are required by tensorflow but do not require furher packages. Tensorflow itself requires several packages which are installed right away when tensorflow itself is installed.
 
-The library versions depend on the system. When we ran the same code on a windows computer with an anaconda distribution and python version 3.7.11, we saw differences in the library versions. However, as long as a python versions 3.6 - 3.9 are used and pip versions >= 19.0, tensorflow can be installed normally and we can run the file from the terminal.
+The library versions depend on the system. When we ran the same code on a windows computer with an anaconda distribution and python version 3.7.11, we saw differences in the library versions. However, as long as a python versions 3.6 - 3.9 are used and pip versions >= 19.0, tensorflow can be installed normally and allowing everybody to run the code from the terminal.
 
 
 ### Task 5: What the code does

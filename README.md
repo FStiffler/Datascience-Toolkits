@@ -9,7 +9,7 @@ The collaborators are Monica Perez, Kateryna Myskova and Flurin Stiffler. Togeth
 
 ### Milestone 1
 
-In the first milestone, we had to set up our github repo and we were assigned a [data](http://yann.lecun.com/exdb/mnist/) as well as a [codebase](https://github.com/keras-team/keras-io/blob/master/examples/vision/mnist_convnet.py).
+In the first milestone, we had to set up our github repo and we were assigned [data](http://yann.lecun.com/exdb/mnist/) as well as a [codebase](https://github.com/keras-team/keras-io/blob/master/examples/vision/mnist_convnet.py).
 
 In the following steps, we explain how the codebase can be run on a computer with Ubuntu 20.04.
 
