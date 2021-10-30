@@ -152,60 +152,103 @@ When we used this command for the keras and numpy library, we saw that both libr
 The library versions depend on the system. When we ran the same code on a windows computer with an anaconda distribution and python version 3.7.11, we saw differences in the library versions. However, as long as a python versions 3.6 - 3.9 are used and pip versions >= 19.0, tensorflow can be installed normally and allowing everybody to run the code from the terminal.
 
 
-### Task 5: What the code does
+## Task 5: What the code does
 
-Dependencies that must be imported before running the could could be checked for by running the following command:
+The ``` $ mnist_convnet.py ``` code, in order to be understood correctly and run smoothly, should be divided into several parts, with each one being run and explained before moving on to the next one.
 
-```
-
-$ pip show keras
-$ pip show tensorflow
+First, one should start with importing the necessary packages, i.e. ``` numpy ```, ``` tensorflow ``` and ``` keras ```, the latter being imported directly from ``` tensorflow ```. The Tensorflow library here is the most important for the code to run, as it used here for the CNN, i.e. Convolutional Neural Network. Keras comes second in importance, being applied to create the neural network in the last part of the code.
 
 ```
 
-By checking for pre-required dependencies, one finds that keras package runs on version 2.6.0, and itself is required by the tensorflow package, despite having no additional requirements of its own.
-
-Tensorflow package, on the other hand, also runs on 2.6.0 version, and is an open source machine learning framework for everyone, and has a rather wide list of required pre-installed packages to run:
-
-
-
-| wrapt                | 1.12.1  | _
-| gast                 | 0.4.0   | _
-| astunparse           | 1.6.3   | _
-| h5py                 | 3.1.0   | _
-| numpy                | 1.19.5  | _
-| protobuf             | 3.19.1  | _
-| flatbuffers          | 1.12    | _
-| opt-einsum           | 3.3.0   | _
-| tensorflow-estimator | 2.6.0   | _
-| typing-extensions    | 3.7.4.3 | _
-| tensorboard          | 2.7.0   | _
-| keras-preprocessing  | 1.1.2   | _
-| six                  | 1.15.0  | _
-| google-pasta         | 0.2.0   | _
-| wheel                | 0.36.2  | _
-| clang                | 5.0     | _
-| absl-py              | 0.15.0  | _
-| grpcio               | 1.41.1  | _
-| keras                | 2.6.0   | _
-| termcolor            | 1.1.0   | _
-
-
-
-
-
-The indicated versions of each of these required packages could be checked by running the command
+$ import numpy as np
+$ from tensorflow import keras
+$ from tensorflow.keras import layers
 
 ```
 
-$ pip3 list
+Having completed the initial preparatory steps, one may turn directly to the code. As this code is designed to recognize the handwritten digits, normalized and centered in a fixed-size 28*28-pixel image, the model and data paramaters must be processed.
 
 ```
 
-which produces the complete list of packages and their respective versions that go together with tensorflow and/or keras.
+$ num_classes = 10
+$ input_shape = (28, 28, 1)
 
-Having run the code command, one receives a message about automatic dowloading of data from both tensorflow and keras storagespaces in googleapis. The technical details of the training process are also displayed, e.g. the X train shape (60000, 28, 28, 1), where 60,000 stands for the 60 thousand training samples, and double 28 represents the 28*28 field in which images are centered. Tensorflow also specifies that the code is being run with tensorflow binary, which was optimized with Deep Neural Network Library.
+```
+
+The next part is where one would be to normalize the data, i.e. the pixel values between 0 and 255 to a range between 0 to 1. To make sure this command has been executed correctly, one must use the ``` print() ``` command to check for x_train shape.
+
+```
+
+$ (x_train, y_train), (x_test, y_test) = keras.datasets.mnist.load_data()
+
+$ x_train = x_train.astype("float32") / 255
+$ x_test = x_test.astype("float32") / 255
+$ x_train = np.expand_dims(x_train, -1)
+$ x_test = np.expand_dims(x_test, -1)
+
+$ print("x_train shape:", x_train.shape)
+$ print(x_train.shape[0], "train samples")
+$ print(x_test.shape[0], "test samples")
+
+```
+
+
+Running this set of commands would produce a set of class vectors, which must then be converted into binary class matrices, i.e. transforming numbers into categorical values by using the following code:
+
+```
+
+$ y_train = keras.utils.to_categorical(y_train, num_classes)
+$ y_test = keras.utils.to_categorical(y_test, num_classes)
+
+```
+
+Next, building the sequential model would be the most important and complex step of the code. To do that, one would require 7 layers in the line of code, including the convolution layer Conv2D, pooling layer MaxPooling2D, Dropout layer, vector-flattening layer Flatten, and lastly, the output layer dense with softmax activation. To check if the model has been created successfully and correctly and also to get a general understanding of the main outcomes, one might want to run the ``` $ model.summary() ``` command.
 
 The model at issue is sequential, with the outcome being reported tabularly with 3 columns, those being being named layer (type), output shape, and param #. The number of total params and those that have been found to be trainable equals in both cases 34,826, thus allowing to conclude that all paramaters are valid for training.
 
-There were reported 15 epochs, with each following a rapid downward trend of loss numbers, while showing a general (although with insignificant exceptions) upward trend in both accuracy and val_accuracy figures. To be more precise, the first epoch reported 0.3812 loss, while the last 15th epoch showed only 0.0324. As to the accuracy numbers, the val_accuracy figures were set equal to 0.9783, differentiating by almost 0.02 point from the 0.9918 in the 15th epoch. Overall, the test loss numbers were rounded up at 0.0255, and the test accuracy figures showed 0.9919.
+```
+
+$ model = keras.Sequential(
+    [
+        keras.Input(shape=input_shape),
+        layers.Conv2D(32, kernel_size=(3, 3), activation="relu"),
+        layers.MaxPooling2D(pool_size=(2, 2)),
+        layers.Conv2D(64, kernel_size=(3, 3), activation="relu"),
+        layers.MaxPooling2D(pool_size=(2, 2)),
+        layers.Flatten(),
+        layers.Dropout(0.5),
+        layers.Dense(num_classes, activation="softmax"),
+    ]
+)
+
+```
+
+The penultimate step would be to train the newly created model. However, one must firstly complete some basic processing of the data for CNN: here one should define the batch size and the number of epochs the neural network will run. In this case, the algorithms will have to reevaluate the model by passing the dataset in both directions 15 epochs (read: times), and 422 times per epoch.
+
+```
+
+$ batch_size = 128
+$ epochs = 15
+
+```
+
+Having done that, it is now time to compile and finally train the model. In the given of code, one is to work with categorical crossentropy loss and Adam optimizer.
+
+```
+
+$ model.compile(loss="categorical_crossentropy", optimizer="adam", metrics=["accuracy"])
+
+$ model.fit(x_train, y_train, batch_size=batch_size, epochs=epochs, validation_split=0.1)
+
+```
+
+The process will take some time to be completed, but after the machine is done running these lines of code, one should print the results and check for the test loss and test accuracy scores, if one wants to know how well the given model performs.
+
+```
+
+
+$ score = model.evaluate(x_test, y_test, verbose=0)
+$ print("Test loss:", score[0])
+$ print("Test accuracy:", score[1])
+
+```
