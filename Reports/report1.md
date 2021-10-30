@@ -156,7 +156,7 @@ The library versions depend on the system. When we ran the same code on a window
 
 Dependencies that must be imported before running the could could be checked for by running the following command:
 
-```sh
+```
 
 $ pip show keras
 $ pip show tensorflow
@@ -167,30 +167,36 @@ By checking for pre-required dependencies, one finds that keras package runs on 
 
 Tensorflow package, on the other hand, also runs on 2.6.0 version, and is an open source machine learning framework for everyone, and has a rather wide list of required pre-installed packages to run:
 
-wrapt 1.12.1   
-gast 0.4.0
-astunparse 1.6.3
-h5py 3.1.0
-numpy 1.19.5
-protobuf 3.19.1
-flatbuffers 1.12
-opt-einsum 3.3.0
-tensorflow-estimator 2.6.0
-typing-extensions 3.7.4.3
-tensorboard 2.7.0
-keras-preprocessing 1.1.2
-six 1.15.0
-google-pasta 0.2.0
-wheel 0.36.2
-clang 5.0
-absl-py 0.15.0
-grpcio 1.41.1
-keras 2.6.0
-termcolor 1.1.0
+
+
+| wrapt                | 1.12.1  | _
+| gast                 | 0.4.0   | _
+| astunparse           | 1.6.3   | _
+| h5py                 | 3.1.0   | _
+| numpy                | 1.19.5  | _
+| protobuf             | 3.19.1  | _
+| flatbuffers          | 1.12    | _
+| opt-einsum           | 3.3.0   | _
+| tensorflow-estimator | 2.6.0   | _
+| typing-extensions    | 3.7.4.3 | _
+| tensorboard          | 2.7.0   | _
+| keras-preprocessing  | 1.1.2   | _
+| six                  | 1.15.0  | _
+| google-pasta         | 0.2.0   | _
+| wheel                | 0.36.2  | _
+| clang                | 5.0     | _
+| absl-py              | 0.15.0  | _
+| grpcio               | 1.41.1  | _
+| keras                | 2.6.0   | _
+| termcolor            | 1.1.0   | _
+
+
+
+
 
 The indicated versions of each of these required packages could be checked by running the command
 
-``` sh
+```
 
 $ pip3 list
 
@@ -198,7 +204,7 @@ $ pip3 list
 
 which produces the complete list of packages and their respective versions that go together with tensorflow and/or keras.
 
-Having run the code command, one receives a message about automatic dowloadig of data from both tensorflow and keras storagespaces in googleapis. The technical details of the training process are also displayed, e.g. the X train shape (60000, 28, 28, 1), where 60,000 stands for the 60 thousand training samples, and double 28 represents the 28*28 field in which images are centered. Tensorflow also specifies that the code is being run with tensorflow binary, which was optimized with Deep Neural Network Library.
+Having run the code command, one receives a message about automatic dowloading of data from both tensorflow and keras storagespaces in googleapis. The technical details of the training process are also displayed, e.g. the X train shape (60000, 28, 28, 1), where 60,000 stands for the 60 thousand training samples, and double 28 represents the 28*28 field in which images are centered. Tensorflow also specifies that the code is being run with tensorflow binary, which was optimized with Deep Neural Network Library.
 
 The model at issue is sequential, with the outcome being reported tabularly with 3 columns, those being being named layer (type), output shape, and param #. The number of total params and those that have been found to be trainable equals in both cases 34,826, thus allowing to conclude that all paramaters are valid for training.
 
