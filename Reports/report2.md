@@ -29,9 +29,59 @@ See Task 3 and Task 5
 We studied the [PEP8 Style Guide](https://www.python.org/dev/peps/pep-0008/)
 
 
-## Task 5
+## Task 5: Virutal environment and requirements files
 
-That is something, we did not actually do before milestone 2. Therefore we created a [requirements.txt](../requirements.txt) file in the Github root folder. To create the file we made sure to set our locally directory to the root folder and then we used the Linux command:
+### What are virutal environments?
+
+As we mentioned already in our milestone 1 report, some of us already worked in a virtual environments. A virtual environment allows us to work with different dependencies on each project. We might need numpy 1.18.1 for one project but numpy 1.19.1 for another one. In this case virtual environments provide an solution to this problem. We can create two environments with two different versions of numpy and when working on a project, we just activate the one with the correct numpy version.
+
+### How can we set up a virutal environment?
+
+For the purpose of demonstration, we set a new environment from ground and assumed that nothing is preinstalled yet. Therefore, we needed to have pip available before we could even install the virutalenv library which in turn would allow us to install and create virutal environments. For this purpose pip was installed first:
+
+```
+
+sudo apt-get install python3-pip
+
+```
+
+With pip available we could install the virtualenv library:
+
+```
+
+pip install virtualenv
+
+```
+
+Now everything was ready to create a new environment. First of all we had to think of the directory where we wanted to create the virtual environment. It totally makes sense to create the environment within the project directory for which the environment is needed. This, however, implies that we have to prevent git from tracking changes to the virtual environment. Therefore we have to add the environment directory to the gitignore file. For this, please refer to Task 2. For this example we wanted to do exactly that. So we changed our local directory to the project directory and used the following command to create the environment:
+
+```
+
+virtualenv <environment name>
+
+```
+
+The environment is created with the default python version installed on the computer. But we could also define other python versions to use in the environment: as long as we have downloaded and saved them somewhere:
+
+```
+
+virtualenv --python=<Path to python executable to use (for example python3.6)> <Path to location where environment is to be created>
+
+```
+
+Now that the virtual environment was created we could activate it with
+
+```
+
+source <environment name>/bin/activate
+
+```
+
+The virtual environment was now activated and we were able to install libraries.
+
+### How can we make a requirements file work with the virtual environment?
+
+In mileston 1 we described which packages are actually necessary to run the [mnist_convnet.py](mnist_convnet.py) file. Based on these dependencies we were able to create a [requirements.txt](../requirements.txt) file in the Github root folder. To create the file we made sure to set our locally directory to the root folder and then we used the Linux command:
 
 ```sh
 
@@ -39,10 +89,12 @@ $ touch requirements.txt
 
 ```
 
-This created a empty text file. To retrieve the relevant information about the dependencies, we activated our python environments and called `pip list`. Because we installed all required libraries already in milestone 1 and successfully ran the code with said libraries and library versions we could simply copy the names and versions. The two values were pasted into the *requirements.txt* file. Each line contains one required library and the according version separated by *==*. Based on this requirements file everybody can install the necessary libraries to run the code:
+This created a empty text file. To retrieve the relevant information about the dependencies, we activated our old python environments (when there were any already) and called `pip list`. Because we installed all required libraries already in milestone 1 and successfully ran the code with said libraries and library versions we could simply copy the names and versions. The two values were pasted into the *requirements.txt* file. Each line contains one required library and the according version separated by *==*. These libraries are not yet installed in our new environment which is why we deactivated the old environment and reactivated the new environment we just created previously (again make sure to set the correct working directory). Based on this requirements file we could now install all the needed packages also into the new environment by running:
 
 ```
 
 pip install -r requirements.txt
 
 ```
+
+The packages were installed smoothly. And because they were now available in the new environment, we could simply run the python file with `python3 mnist_convnet.py`. No errors were raised. 
