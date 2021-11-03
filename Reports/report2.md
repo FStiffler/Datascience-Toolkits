@@ -97,4 +97,4 @@ pip install -r requirements.txt
 
 ```
 
-The packages were installed smoothly. And because they were now available in the new environment, we could simply run the python file with `python3 mnist_convnet.py`. No errors were raised. 
+The packages were installed smoothly. And because they were now available in the new environment, we could simply run the python file with `python3 mnist_convnet.py`. No errors were raised. The required packages were also added to the README file in the root folder under the section *Requirements*.

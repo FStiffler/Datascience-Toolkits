@@ -64,3 +64,13 @@ $ python3 mnist_convnet.py
 ```
 
 A more detailed report on milestone 1 can be found [here](Reports/report1.md)
+
+## Requirements
+
+### Python packages (including hashes)
+
+numpy == 1.19.5 \
+
+keras == 2.6.0 \
+
+tensorflow == 2.6.0 \
