@@ -28,16 +28,122 @@ See Task 3 and Task 5
 
 We studied the [PEP8 Style Guide](https://www.python.org/dev/peps/pep-0008/)
 
+## Task 1: Clean repository
 
-## Task 5: Virutal environment and requirements files
+### Branching
 
-### What are virutal environments?
+As already mentioned above, our default branch is the *master* branch. We never work on this branch but create new branches to work on during a milestone. We can locally create and checkout branches with the following commands:
+
+```sh
+
+$ git branch <new_branch_name>
+$ git checkout <new_branch_name>
+
+```
+
+The next step is to push the branch to our remote repository as well.
+
+```sh
+
+$ git push -u origin <new_branch_name>
+
+```
+
+Now that the branch is available on the remote repository, somebody else can fetch all the changes including the newly added branch on the remote repository.
+
+```sh
+
+$ git fetch origin
+
+```
+
+A reference to the new branch is now stored locally and by checking out the branch we can work on it.
+
+```sh
+
+$ git checkout <new_branch_name>
+
+```
+
+Just by that, we have created a local working copy of the remote branch which was initially pushed by someone else.
+
+Whenever we create and merged a pull request into the master branch and also create a release tag, we delete the branch used to work on the milestone directly in Github. This is synonymous with deleting the remote branch. This guarantees a cleaner repo and prevents a complicated work tree. Despite being deleted remotely on Github, the branch is still present locally in our repos. To delete a branch which is no longer used the following command can be used:
+
+```sh
+
+$ git branch -d <branch_name>
+
+```
+
+After that our repository is again in the exact same state as our remote repository on Github.
+
+
+### Gitignore
+
+#### What is a gitignore file?
+
+Gitignore files allow us to define file types and whole directories in our repositories which must not be tracked by git. Whenever a new file is added to the git repository locally, git will track that file and list it as an uncommitted change. However, this file might be a picture, video or some other, non textual file which we really should not push to Github. To prevent git from tracking certain file types, we can add a new line to the gitignore file with the following, general syntax
+
+```
+
+*.<filetype>
+
+
+```
+With the asterisk in front of the file type, we just make sure to exclude all files of certain type no matter the actual filename. The filetype is identified by its file extension like for example .mp3, .mov, .tiff or .png. To exclude whole directories, we can use the following syntax.
+
+```
+
+<directory_name>/
+
+```
+This is especially useful if we, for example, store our python environment within the git project folder. Whenever a virtual environment is created in a project folder tracked by git, git recognizes the new directory with all python libraries, executables and all the other files necessary to run the environment. But it does not make any sense to push a local environment to Github. With the command above, we can simply stop git from tracking our environment. This way, everybody can set up a personal environment, add it to the gitignore file and by that prevent it from being tracked. We could also think of the possibility that we have to store large amount of data in our repository which we do not want to push due to the size. When we create a data folder and exclude it from being tracked, everybody can download the data manually in the data folder into his or her repository and work with it. While the files to work with the data is tracked and shared via Github, the data is only stored locally.
+
+**Attention:**
+It is really important that the folder which is not be tracked is named the same on all local repositories. If person 1 has a folder mydata which was added to the gitignore file and person 2 has a folder data, the folder of person 2 is still tracked which means he either has to rename his folder to mydata or he adds his folder to the gitignore file as well. The first solution is the more elegant one though.
+
+#### How to create a gitignore file?
+
+We already created a gitignore file before we started working on the milestones. This was done with the command `touch .gitignore`. To work on the file, one can use any text editor. We work with *atom* on this project. With `atom .gitignore` the gitignore file is opened in  atom and it is possible to add "ignores". As of now, our file contains the following "ignores":
+
+- Our virtual environments
+- .idea directory which is created by pycharm when starting a new project in a directory
+
+#### Strategy to work with gitignore file?
+
+The gitignore file itself can be modified and pushed to the remote repository which allows collaborators to pull the changes. Therefore, it is important to push the gitignore changes as soon as they are made. There are different work cases which can occur and which require different handling of the gitignore file.
+
+1. **Working on the same branch consecutively**
+
+If two or more collaborates work on the same feature branch in a consecutive fashion, they have to pull the most recent changes from the remote repo so that the gitignore file is up to date.
+
+```sh
+
+$ git pull
+
+```
+After that they can work normally and push possible changes to the gitignore file for others to pull again.
+
+2. **Working on the same branch simultaneously**
+
+If two or more collaborates work on the same feature branch simultaneously, they have to push their changes to the remote repo. If a merge conflict arises because both have changed entries in the gitignore file, atom can be used to resolve the conflict.
+
+
+3. **Working on a different branch**
+
+If two or more collaborates work on different feature branches, they must be merged eventually (creating a pull request) before they can be merged back into the master branch. Merge conflicts need to be resolved. After the two feature branches are merged, the gitignore file should contain "ignores" from both branches and therefore ignore the correct files for all collaborators.
+
+Since we created only one feature branch per milestone we will run into case 1 and 2 a lot.
+
+## Task 5: Virtual environment and requirements files
+
+### What are virtual environments?
 
 As we mentioned already in our milestone 1 report, some of us already worked in a virtual environments. A virtual environment allows us to work with different dependencies on each project. We might need numpy 1.18.1 for one project but numpy 1.19.1 for another one. In this case virtual environments provide an solution to this problem. We can create two environments with two different versions of numpy and when working on a project, we just activate the one with the correct numpy version.
 
-### How can we set up a virutal environment?
+### How can we set up a virtual environment?
 
-For the purpose of demonstration, we set a new environment from ground and assumed that nothing is preinstalled yet. Therefore, we needed to have pip available before we could even install the virutalenv library which in turn would allow us to install and create virutal environments. For this purpose pip was installed first:
+For the purpose of demonstration, we set a new environment from ground and assumed that nothing is preinstalled yet. Therefore, we needed to have pip available before we could even install the virtualenv library which in turn would allow us to install and create virtual environments. For this purpose pip was installed first:
 
 ```
 
@@ -57,7 +163,7 @@ Now everything was ready to create a new environment. First of all we had to thi
 
 ```
 
-virtualenv <environment name>
+virtualenv <environment_name>
 
 ```
 
@@ -65,7 +171,7 @@ The environment is created with the default python version installed on the comp
 
 ```
 
-virtualenv --python=<Path to python executable to use (for example python3.6)> <Path to location where environment is to be created>
+virtualenv --python=<Path_to_python_executable> <Path_to_workingdirectory>
 
 ```
 
@@ -73,7 +179,7 @@ Now that the virtual environment was created we could activate it with
 
 ```
 
-source <environment name>/bin/activate
+source <environment_name>/bin/activate
 
 ```
 
