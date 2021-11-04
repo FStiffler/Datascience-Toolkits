@@ -135,6 +135,48 @@ If two or more collaborates work on different feature branches, they must be mer
 
 Since we created only one feature branch per milestone we will run into case 1 and 2 a lot.
 
+
+
+### Task 2
+
+**Q1. What is a Hash function? What are some of the use cases?**
+
+A hash function is a python function that converts any input value into a fixed size integer, aka the hash value. This integer identifies with a particular value and is very useful, as it enables quick look-up and/or comparison of values in large datasets by returning the hash value of the requested object. The hash function can only take a single parameter, although the hash value can be returned in a range of forms, i.e. integers, strings, or floats. Equal inputs also always receive the same hash value.
+
+For a specific example, one may think of some sort of a "digital fingerprint" of some input. One may also consider the method of geographical coordinates assignment - each specific point on the surface of the Earth has its own unique numeric identifier, which greatly simplifies and speeds up the process of looking it up or locating it. As to our project at case, GitHub creates the exact same unique identifier each time a new commit is registered.
+
+**Q2. What is a Python module, package and script? How do they differ from one another?**
+
+A python script is a python file that contains the code, i.e. the entirety of all the symbols and their variations and/or combination that, taken together, constitute a single or a sequence of commands. The script is intended to be run directly.
+
+A python module is also a python file, but the one that has to be imported into python scripts and/or other modules. These modules (or libraries) come with their own built-in functions, variables and classes.
+
+A python package is a collection of the aforementioned modules that is designed to provide certain functionality to the combination of certain modules. Very often such packages come in the form of folders, out of which these modules can be important in a regular way; however, package folders also have a special ```init.py``` file that signals to Python that it is a multiple-module containing package.
+
+**Q3. How would you explain a Docker container and volume to a child?**
+
+In the simplest of terms, a Docker container is a box that contains an application and all the operative information. Such containers are also separate from each other, yet have certain communication channels for limited connection.
+
+A Docker volume, however, is a detachable system for internal connection between containers and for manual adding/deleting of data from a container. This could be compared to some "sleeve" that might be used to take something out of a box or add some items into it.
+
+**Q4. What is your preference concerning the use of Python virtualenv and Docker? When would you use one or the other?**
+
+It is very hard to make such choice at this point, because we have not had sufficient exposure to either one of the options, Docker even more so. However, the experience with virtualenv that we have had allows us to come to a preliminary conclusion that Python virtualenv only keeps dependencies, whereas with Docker it is possible to store the entire "universe" of code. Furthermore, when using virtualenv, the code might be broken if used on a machine with a different python version; Docker, however, allows to install the correct version of python inside a specific container, thus avoiding that problem.
+
+**Q5. What is the Docker build context?**
+
+```
+$ docker build [OPTIONS] PATH | URL | -
+```
+The Docker build context allows to build Docker images from a file and a context. That context, in its turn, is a set of files with specified locations - ```PATH``` or ```URL```, as seen in the command. The build process can refer to any of the files in the context.
+
+**Q6. How can you assess the quality of a python package on PyPI?**
+
+By checking the GitHub statistics, one may check the quality and rated reliability of certain python packages. Such statistics may include the number of stars, forks and/or open issues.
+
+
+
+
 ## Task 5: Virtual environment and requirements files
 
 ### What are virtual environments?
