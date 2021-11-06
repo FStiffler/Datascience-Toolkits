@@ -1,3 +1,6 @@
+# import libraries
+import os
+
 # define all parameters for following steps
 num_classes = 10  # number of digits to be classified (for mnist dataset 10)
 input_shape = (28, 28, 1)
