@@ -233,8 +233,7 @@ For the purpose of modularizing our code we had to think about how we could poss
 
 1. Loading data
 2. Preparing data
-2. Building the model
-3. Training the model
+3. Building and training the model
 4. Evaluating the model
 5. Saving the model
 6. Loading the saved model again
@@ -257,7 +256,11 @@ However we recognized two problems. First we were not able to find the file *dat
 
 #### 2. Preparing data
 
-Initially we thought we can use the same file to prepare and load the data. However, that was not the case because we had to call the functions consecutively. So we created a new file *data_prepare.py* and made sure that the output of *data_load.py* is going to be the input of *data_load.py*.
+Initially we thought we can use the same file to prepare and load the data. However, that was not the case because we had to call the functions consecutively. So we created a new file *data_prepare.py* with the function `prepare_data()` based on the code from the *mnist_convnet.py* file. We made sure that the output of `load_data()` is going to be the input of `prepare_data()`. An additional input is the number of classes which is set at the beginning of the *main.py* file. The output of `prepare_data()` is the prepared data. By importing this module function into the *main.py* file, we can generate the prepared data.
+
+#### 3. Building and training the model
+
+Upon first review, we thought that we have to separate model creation and model training. But considering the code in more detail we decided to combine those two steps which is why we adjusted also the list above. We created a new python file *train_model.py*. This file contains the function `train_model()`. This function creates the model conceptually with all of its layers and fits the model to the training data. The inputs are the "x_train" and "y_train" outputs of `prepare_data()` called in the previous step. Additional inputs are the variables "input_shape", "num_classes", "batch_size" and "epochs" which are defined in the *main.py* file directly. Again by importing the module in *main.py* we can train the model based on the data obtained in previous steps. 
 
 
 ## Task 5: Virtual environment and requirements files
