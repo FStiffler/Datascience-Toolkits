@@ -2,16 +2,8 @@
 import numpy as np
 from tensorflow import keras
 
-# define number of classes
-num_classes = 10
-
-# function to load data
-def load_data():
-    (x_train, y_train), (x_test, y_test) = keras.datasets.mnist.load_data()
-    return x_train, y_train, x_test, y_test
-
 # function to prepare data
-def prepare_data():
+def prepare_data(x_train, y_train, x_test, y_test, num_classes):
     # Scale images to the [0, 1] range
     x_train = x_train.astype("float32") / 255
     x_test = x_test.astype("float32") / 255
@@ -25,3 +17,7 @@ def prepare_data():
     # convert class vectors to binary class matrices
     y_train = keras.utils.to_categorical(y_train, num_classes)
     y_test = keras.utils.to_categorical(y_test, num_classes)
+
+    print("Data prepared")
+
+    return x_train, y_train, x_test, y_test

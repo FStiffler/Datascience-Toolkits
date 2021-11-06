@@ -252,10 +252,12 @@ from data_load_prepare import load_data
 load_data()
 ```
 
-However we recognized two problems. First we were not able to find the file *data_load.py* and consequently to import the function. To solve that we had to define the *code* directory as a source folder. After that pycharm recognized the file and we could load the function. But the next problem awaited. The function to load the data relies on keras and although we loaded keras in our *main.py* file, we were not able to load the data. Therefore we had to import keras already in *data_load.py*. After that everything worked fine. The function allows the loading of the data into the *main.py* file. 
+However we recognized two problems. First we were not able to find the file *data_load.py* and consequently to import the function. To solve that we had to define the *code* directory as a source folder. After that pycharm recognized the file and we could load the function. But the next problem awaited. The function to load the data relies on keras and although we loaded keras in our *main.py* file, we were not able to load the data. Therefore we had to import keras already in *data_load.py*. After that everything worked fine. The function allows the loading of the data into the *main.py* file.
+
 
 #### 2. Preparing data
 
+Initially we thought we can use the same file to prepare and load the data. However, that was not the case because we had to call the functions consecutively. So we created a new file *data_prepare.py* and made sure that the output of *data_load.py* is going to be the input of *data_load.py*.
 
 
 ## Task 5: Virtual environment and requirements files
