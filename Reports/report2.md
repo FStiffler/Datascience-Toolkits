@@ -216,10 +216,46 @@ The figure was not displayed. So we tried to install *tkinter* as was stated [he
 
 ### Final solution
 
-In the final solution it is possible to run the *mnist_convnet.py* file to fit the model and save it to a h5 file. After that we can run the *model_load.py* file to predict the digits on the test set. To verify the code, a loop runs over the first ten pictures. It shows the picture by automatically opening the matplotlib UI and prints the prediction to the picture into the console.
+In the final solution it is possible to run the *mnist_convnet.py* file to fit the model and save it to a h5 file. After that we can run the *model_load.py* file to predict the digits on the test set. To verify the code, a loop runs over the first ten pictures. It shows one picture at the time by automatically opening the matplotlib UI and prints the prediction to the picture into the console. Then the code opens the next picture and so on.
 
 **Attention**:
 Make sure that the console is not covered by the matplotlib interface when running the code otherwise you won't see the actual predictions
+
+## Task 4: Modularize code
+
+### Structure of repository
+
+Since we are required to create several modules which would look pretty messy if they were all stored in the root folder, we created a new directory called *code*. All the modules are to be stored in this directory.
+
+### What modules to build?
+
+For the purpose of modularizing our code we had to think about how we could possibly split our code into meaningful parts. For that purpose we opened the files *mnist_convnet.py* and *model_load.py* from the previous task to gain an overview over the different steps conducted in the code. We identified the following steps:
+
+1. Loading data
+2. Preparing data
+2. Building the model
+3. Training the model
+4. Evaluating the model
+5. Saving the model
+6. Loading the saved model again
+7. Making predictions
+8. Verify predictions
+
+We knew, we had to create modules which would complete all these steps individually and can be run from the the *main.py* file. So we started creating the according modules in the *code* directory. We also directly created our *main.py* in order to test out the different modules right away.
+
+#### 1. Loading data
+
+We created a file *data_load.py* and added a function `load_data()` to load the data. We used the exact same code to load the data as in *mnist_convnet.py*. After that we tried to import the function to the *main.py* file by adding the following code:
+
+```
+from data_load_prepare import load_data
+load_data()
+```
+
+However we recognized two problems. First we were not able to find the file *data_load.py* and consequently to import the function. To solve that we had to define the *code* directory as a source folder. After that pycharm recognized the file and we could load the function. But the next problem awaited. The function to load the data relies on keras and although we loaded keras in our *main.py* file, we were not able to load the data. Therefore we had to import keras already in *data_load.py*. After that everything worked fine. The function allows the loading of the data into the *main.py* file. 
+
+#### 2. Preparing data
+
 
 
 ## Task 5: Virtual environment and requirements files
