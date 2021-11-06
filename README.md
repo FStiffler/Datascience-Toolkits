@@ -74,3 +74,5 @@ numpy == 1.19.5 \
 keras == 2.6.0 \
 
 tensorflow == 2.6.0 \
+
+matplotlib == 3.4.3 \
