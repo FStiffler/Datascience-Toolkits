@@ -237,8 +237,7 @@ For the purpose of modularizing our code we had to think about how we could poss
 4. Evaluating the model
 5. Saving the model
 6. Loading the saved model again
-7. Making predictions
-8. Verify predictions
+7. Making predictions and verify them
 
 We knew, we had to create modules which would complete all these steps individually and can be run from the the *main.py* file. So we started creating the according modules in the *code* directory. We also directly created our *main.py* in order to test out the different modules right away.
 
@@ -260,7 +259,27 @@ Initially we thought we can use the same file to prepare and load the data. Howe
 
 #### 3. Building and training the model
 
-Upon first review, we thought that we have to separate model creation and model training. But considering the code in more detail we decided to combine those two steps which is why we adjusted also the list above. We created a new python file *train_model.py*. This file contains the function `train_model()`. This function creates the model conceptually with all of its layers and fits the model to the training data. The inputs are the "x_train" and "y_train" outputs of `prepare_data()` called in the previous step. Additional inputs are the variables "input_shape", "num_classes", "batch_size" and "epochs" which are defined in the *main.py* file directly. Again by importing the module in *main.py* we can train the model based on the data obtained in previous steps. 
+Upon first review, we thought that we have to separate model creation and model training. But considering the code in more detail we decided to combine those two steps which is why we adjusted also the list above. We created a new python file *train_model.py*. This file contains the function `train_model()`. This function creates the model conceptually with all of its layers and fits the model to the training data. The inputs are the "x_train" and "y_train" outputs of `prepare_data()` called in the previous step. Additional inputs are the variables "input_shape", "num_classes", "batch_size" and "epochs" which are defined in the *main.py* file directly. Again by importing the module in *main.py* we can train the model based on the data obtained in previous steps.
+
+The first time wen ran the file, my virtual machine hang up. So we had to restart it. To prevent our machines from hanging up again, we had increased the batch size and reduced the number of epochs (changed the according parameters in the file directly).
+
+#### 4. Evaluating the model
+
+We created a file *evaluate_model.py* with the function `evaluate()`. The function takes the fitted model and the test data as input to create an evaluation score which is printed to the console. As with all the previous steps, we simply copied the corresponding code of the *mnist_convnet.py* file. We implemented this function into *main.py*.
+
+#### 5. Saving the model/ 6. Loading the saved model again
+
+We thought it would be reasonable to create one module to do both, save a model into a h5 file and load it again. Therefore we created the file *handling_model.py*. It has two functions. The function `save_model()` which allows to save a model under a directory relative to the root directory and with a specific name. Both directory and name are defined in *main.py*. The relative directory, therefore, is concatenated from the working directory and a string. The second function `load_model()` allows to load a previously saved model from a specific location. The code for both functions stems from the *model_load.py* file from Task 3.
+
+When we ran the file, we got an `permission denied error`. We realized that we made an error when joining the relative path. We corrected the mistake and ran the code successfully after that.
+
+#### 7. Making predictions and verify them
+
+Finally we created the file *predictions.py* to make predictions based on an input and a model. The file contains the function `predictions()` which takes the previously loaded model and the test data as input. Furthermore we have to define how many pictures of the test data with according predictions we want to show. The function returns the predictions for the test data and shows the predefined number of pictures with predicted digit in the console.
+
+### What happens to the old files?
+
+With the work we did so far, the two files *model_load.py* and *mnist_convnet.py* are now successfully decomposed into modules and are no longer needed. Therefore we created a folder for these two files named *original*.
 
 
 ## Task 5: Virtual environment and requirements files
@@ -305,7 +324,7 @@ The virtual environment was now activated and we were able to install libraries.
 
 ### How can we make a requirements file work with the virtual environment?
 
-In mileston 1 we described which packages are actually necessary to run the [mnist_convnet.py](mnist_convnet.py) file. Based on these dependencies we were able to create a [requirements.txt](../requirements.txt) file in the Github root folder. To create the file we made sure to set our locally directory to the root folder and then we used the Linux command:
+In mileston 1 we described which packages are actually necessary to run the [mnist_convnet.py](../original/mnist_convnet.py) file. Based on these dependencies and further dependecies required for the [main.py](../code/mnist_convnet.py) we were able to create a [requirements.txt](../requirements.txt) file in the Github root folder. To create the file we made sure to set our locally directory to the root folder and then we used the Linux command:
 
 ```sh
 
@@ -319,4 +338,4 @@ This created a empty text file. To retrieve the relevant information about the d
 pip install -r requirements.txt
 ```
 
-The packages were installed smoothly. And because they were now available in the new environment, we could simply run the python file with `python3 mnist_convnet.py`. No errors were raised. The required packages were also added to the README file in the root folder under the section *Requirements*.
+The packages were installed smoothly. And because they were now available in the new environment, we could simply navigate to the *main.py* file and run it with `python3 main.py`. No errors were raised. The required packages were also added to the README file in the root folder under the section *Requirements*.
