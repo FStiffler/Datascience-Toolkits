@@ -1,4 +1,7 @@
+# Virtual environments and similar #
 venv/
 DTA_venv/
 .idea/
 
+# File types #
+*.h5
