@@ -396,9 +396,123 @@ docker run hello-world
 
 The test command ran successfully.
 
+2. Before starting to work directly with our model and engaging it with a docker container, we decided to try out the docker functionality and followed the set up and run instructions from Docker Docs with their test app. This helped to better understand the basic commands and functions of Docker, as well as allowed us to prepare ourselves for writing our own Dockerfile later.
+To do this, we followed several steps:
+  1. To initiate the set up process after successful installation, we created a directory for a test project, following the instructions form Docker Docs.
+    ```
+    $ mkdir composetest
+    $ cd composetest
+    ```
+  Then we had to create a file in a separate text/code editor, naming it ```app.py``` and saving in the test project directory with the given code:
 
-2. **NEEDS TO BE AT THE END**
- In order to create a docker container we first looked at potential docker images of use on dockerHub. Therefore we created an account to have access to the images. An useful image migth be the official python image. we downloaded it with `docker pull python`. By that, the docker image was available on our system.
+    ```
+    $ import time
+
+    $ import redis
+    $ from flask import Flask
+
+    $ app = Flask(__name__)
+    $ cache = redis.Redis(host='redis', port=6379)
+
+    $ def get_hit_count():
+        retries = 5
+        while True:
+          try:
+            return cache.incr('hits')
+              except redis.exceptions.ConnectionError as exc:
+              if retries == 0:
+                  raise exc
+                retries -= 1
+            time.sleep(0.5)
+
+    $ @app.route('/')
+    $ def hello():
+      count = get_hit_count()
+      return 'Hello World! I have been seen {} times.\n'.format(count)
+    ```
+    This had to be followed by another file creation, this time ```requirements.txt``` containing only ```flask``` and ```redis```, with the latter being the hostname of the redis container on the network.
+
+    2. Having set the groundwork for dockerization, we could now move on to creating a test Dockerfile that will build the Docker image in the end. The Dockerfile is where all the dependencies are stored to be later used by Python.
+
+```
+# syntax=docker/dockerfile:1
+FROM python:3.7-alpine
+WORKDIR /code
+ENV FLASK_APP=app.py
+ENV FLASK_RUN_HOST=0.0.0.0
+RUN apk add --no-cache gcc musl-dev linux-headers
+COPY requirements.txt requirements.txt
+RUN pip install -r requirements.txt
+EXPOSE 5000
+COPY . .
+CMD ["flask", "run"]
+```
+
+  This code contains information for Docker about which Python version to use with this Python image, sets directory to ```/code```, copies the current directory to the working directory in the image and sets the command for the container.
+
+  One more important file to create before composing a Docker container is the ```docker-compose.yml``` file:
+
+```
+version: "3.9"
+services:
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+  redis:
+    image: "redis:alpine"
+```
+
+  This had to be pasted into an empty file in our text editor, specifying the ports to be used by Docker.
+  Now we are ready to start the test application.
+
+  3. Building and running the test Docker app
+
+  By executing the ```$ docker-compose up``` command in the terminal, the machine starts pulling all the lacking locally information and creating the image for our given code whilst starting the processes we defined earlier in the prerequired files. This takes some time when being run for the first time.
+
+  Having waited long enough for the machine to finish the task, one may type in ```https://localhost:5000/``` in ther browser and check whether the code worked or not. If everything has been done correctly, like in our case, a "Hello World! I have been seen 1 times." message should appear on the screen. The number of views should change with each time the page is refreshed.
+
+  To check whether there are any other local images present, we simply used the
+```
+$ docker image ls
+```
+  to list all local images with their respective repositories, tags, image IDs etc.
+
+  To stop the application from running, a ```docker-compose down``` command or a Ctrl+C combination would suffice.
+
+  4. One step further that we took was adding the bind mount to the test app by editing the ```docker-compose.yml``` file:
+```
+version: "3.9"
+services:
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/code
+    environment:
+      FLASK_ENV: development
+  redis:
+    image: "redis:alpine"
+ ```
+
+  The added ```volumes``` key mounts the project directory to /code inside of the container, taking away the obligation to rebuild the image each time the code must be changed.
+
+  After this, the only steps left in running our test app was to re-build and run the app with already beknownst to us command ```docker-compose up```. We also followed the suggestion from Docker Docs, and modified the app.py file, so that its greeting message sounded differenly:
+
+ ```
+ return 'Hello from Docker! I have been seen {} times.\n'.format(count)
+ ```
+
+3. Having completed the Docker rookie initiation, we decided we were finally ready to create our own docker container and Dockerfile. We carefully wrote the **Dockerfile** and even **docker-compose.yml**, saved the updated **requirements.txt** to the correct directory, and retraced every step we have completed in the Docker training. However, upon attempting to complete the **docker run** command with our python file (i.e. training model), we kept getting an error
+```
+Top-level object must be a mapping
+```
+The **docker-compose up** command was returning the same error message over and ever again, so we checked our Dockerfile for errors multiple times, editing every minor detail and re-running the command, but to no avail. So, then we turned to online community sources for help. However, neither generic google nor stackoverflow forums did not manage to shed any light on the issue we were having, as it was clearly a problem with the newest Dockerfile code, since before we started dockerizing our own model, Docker was running smoothly.
+So we decided to take a completely another approach, which proved to be a lot more successful. Time to dockerize our model!
+
+4. *Happy ending to a confusing story*
+ In order to create a docker container we first looked at potential docker images of use on dockerHub. Therefore we created an account to have access to the images. An useful image might be the official python image. We downloaded it with `docker pull python`. By that, the docker image was available on our system.
 
 The next step was to create the docker file in our local repository. The docker file can be used to create a docker image which can build a container. We creatd a new file with `touch Dockerfile` and added the following code:
 
@@ -504,113 +618,3 @@ CMD python modules/main.py
 ```
 
 Now the image was built succesfully. We were also able to run the image to create a container with the command `docker run <image_id>`. But we realized that our image had no image name and tag when we looked at the images with `docker images`. So we recreated the image with `docker build -t milestone2:v1 .`. After that we can run the image to create a container named 'milestone2' with `docker run --name milestone2 milestone2:v1`.
-
-
-
-2. To initiate the set up process after successful installation, we created a directory for a test project, following the instructions form Docker Docs.
-```
-$ mkdir composetest
-$ cd composetest
-```
-Then we had to create a file in a separate text/code editor, naming it ```app.py``` and saving in the test project directory with the given code:
-
-```
-$ import time
-
-$ import redis
-$ from flask import Flask
-
-$ app = Flask(__name__)
-$ cache = redis.Redis(host='redis', port=6379)
-
-$ def get_hit_count():
-    retries = 5
-    while True:
-        try:
-            return cache.incr('hits')
-        except redis.exceptions.ConnectionError as exc:
-            if retries == 0:
-                raise exc
-            retries -= 1
-            time.sleep(0.5)
-
-$ @app.route('/')
-$ def hello():
-    count = get_hit_count()
-    return 'Hello World! I have been seen {} times.\n'.format(count)
-```
-This had to be followed by another file creation, this time ```requirements.txt``` containing only ```flask``` and ```redis```, with the latter being the hostname of the redis container on the network.
-
-3. Having set the groundwork for dockerization, we could now move on to creating a test Dockerfile that will build the Docker image in the end. The Dockerfile is where all the dependencies are stored to be later used by Python.
-
-```
-# syntax=docker/dockerfile:1
-FROM python:3.7-alpine
-WORKDIR /code
-ENV FLASK_APP=app.py
-ENV FLASK_RUN_HOST=0.0.0.0
-RUN apk add --no-cache gcc musl-dev linux-headers
-COPY requirements.txt requirements.txt
-RUN pip install -r requirements.txt
-EXPOSE 5000
-COPY . .
-CMD ["flask", "run"]
-```
-
-This code contains information for Docker about which Python version to use with this Python image, sets directory to ```/code```, copies the current directory to the working directory in the image and sets the command for the container.
-
-One more important file to create before composing a Docker container is the ```docker-compose.yml``` file:
-
-```
-version: "3.9"
-services:
-  web:
-    build: .
-    ports:
-      - "5000:5000"
-  redis:
-    image: "redis:alpine"
-```
-
-This had to be pasted into an empty file in our text editor, specifying the ports to be used by Docker.
-Now we are ready to start the test application.
-
-4. Building and running the test Docker app
-
-By executing the ```$ docker-compose up``` command in the terminal, the machine starts pulling all the lacking locally information and creating the image for our given code whilst starting the processes we defined earlier in the prerequired files. This takes some time when being run for the first time.
-
-Having waited long enough for the machine to finish the task, one may type in ```https://localhost:5000/``` in ther browser and check whether the code worked or not. If everything has been done correctly, like in our case, a "Hello World! I have been seen 1 times." message should appear on the screen. The number of views should change with each time the page is refreshed.
-
-To check whether there are any other local images present, we simply used the
-```
-$ docker image ls
-```
-to list all local images with their respective repositories, tags, image IDs etc.
-
-To stop the application from running, a ```docker-compose down``` command or a Ctrl+C combination would suffice.
-
-5. One step further that we took was addint the bind mount to the test app by editing the ```docker-compose.yml``` file:
-```
-version: "3.9"
-services:
-  web:
-    build: .
-    ports:
-      - "5000:5000"
-    volumes:
-      - .:/code
-    environment:
-      FLASK_ENV: development
-  redis:
-    image: "redis:alpine"
- ```
-
- The added ```volumes``` key mounts the project directory to /code inside of the container, taking away the obligation to rebuild the image each time the code must be changed.
-
- After this, the only steps left in running our test app was to re-build and run the app with already beknownst to us command ```docker-compose up```. We also followed the suggestion from Docker Docs, and modified the app.py file, so that its greeting message sounded differenly:
-
- ```
- return 'Hello from Docker! I have been seen {} times.\n'.format(count)
- ```
-
- 6. Time to dockerize our own model!
