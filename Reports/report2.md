@@ -382,6 +382,130 @@ $  sudo docker run hello-world
 ```
 
 For us everything worked smoothly so far, so we continued to set up docker.
+However, it is tedious to have always to use `sudo` because our user account has not the required privileges. Therefore we added root user privileges to our standard user.
+
+```
+sudo groupadd docker
+
+sudo usermod -aG docker $USER
+
+newgrp docker
+
+docker run hello-world
+```
+
+The test command ran successfully.
+
+
+2. **NEEDS TO BE AT THE END**
+ In order to create a docker container we first looked at potential docker images of use on dockerHub. Therefore we created an account to have access to the images. An useful image migth be the official python image. we downloaded it with `docker pull python`. By that, the docker image was available on our system.
+
+The next step was to create the docker file in our local repository. The docker file can be used to create a docker image which can build a container. We creatd a new file with `touch Dockerfile` and added the following code:
+
+```
+FROM python:3.8
+
+WORKDIR /app
+
+COPY code/main.py
+COPY code/main.py
+COPY code/main.py
+COPY code/main.py
+COPY code/main.py
+COPY requirements.txt
+
+RUN pip install -r requirements.txt
+
+CMD python main.py
+```
+
+Then we ran `docker build .` to create an image. However we got an error message:
+
+```
+Sending build context to Docker daemon  2.674GB
+Error response from daemon: dockerfile parse error line 5: COPY requires at least two arguments, but only one was provided. Destination could not be determined.
+```
+
+We realized that we forgot to define the `<dest>` of the copy command. Therefore we added the new working directory for our docker container to the file as destination expressed by a single point.
+
+```
+FROM python:3.8
+
+WORKDIR /app
+
+COPY code/main.py .
+COPY requirements.txt .
+
+RUN pip install -r requirements.txt
+
+CMD python main.py
+```
+
+We reran `docker build .`. But now we got the following error message:
+
+```
+ModuleNotFoundError: No module named 'data_load'
+```
+
+Now it was clear that we had to add every single module to the image (Which makes kind of sense). So we did that.
+
+```
+FROM python:3.8
+
+WORKDIR /app
+
+COPY code/*.py .
+COPY requirements.txt .
+
+RUN pip install -r requirements.txt
+
+CMD python main.py
+```
+
+We reran `docker build .`. But we got another message:
+
+```
+When using COPY with more than one source file, the destination must be a directory and end with a /
+```
+We made further changes to the docker file:
+
+```
+FROM python:3.8
+
+WORKDIR /app
+
+COPY code/*.py modules/
+COPY requirements.txt .
+
+RUN pip install -r requirements.txt
+
+CMD python main.py
+```
+
+And of course we got another error after have successfully built our image and tried to run a container.
+
+```
+python: can't open file 'main.py': [Errno 2] No such file or directory
+```
+
+It can't run *main.py* because it is not in the directory `/app ` but in `/app/modules`. So we changed the code again.
+
+```
+FROM python:3.8
+
+WORKDIR /app
+
+COPY code/*.py modules/
+COPY requirements.txt .
+
+RUN pip install -r requirements.txt
+
+CMD python modules/main.py
+```
+
+Now the image was built succesfully. We were also able to run the image to create a container with the command `docker run <image_id>`. But we realized that our image had no image name and tag when we looked at the images with `docker images`. So we recreated the image with `docker build -t milestone2:v1 .`. After that we can run the image to create a container named 'milestone2' with `docker run --name milestone2 milestone2:v1`.
+
+
 
 2. To initiate the set up process after successful installation, we created a directory for a test project, following the instructions form Docker Docs.
 ```
@@ -490,4 +614,3 @@ services:
  ```
 
  6. Time to dockerize our own model!
- 
