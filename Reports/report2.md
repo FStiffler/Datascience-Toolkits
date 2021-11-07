@@ -339,3 +339,155 @@ pip install -r requirements.txt
 ```
 
 The packages were installed smoothly. And because they were now available in the new environment, we could simply navigate to the *main.py* file and run it with `python3 main.py`. No errors were raised. The required packages were also added to the README file in the root folder under the section *Requirements*.
+
+
+## Task 6: Dockerizing the model
+
+1. To install docker onto our machine, we first need to give out a few commands in the terminal:
+
+```
+$ sudo apt-get update
+
+$ sudo apt-get install \
+   ca-certificates \
+   curl \
+   gnupg \
+   lsb-release
+
+$  curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+```
+and lastly, set up a stable repository
+```
+$ echo \
+ "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
+ $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+```
+
+There is also another way to install Docker Engine, as is instructed on the Docker Docs:
+
+```
+$ sudo apt-get update
+$ sudo apt-get install docker-ce docker-ce-cli containerd.io
+```
+and if one were looking for a specific version of Docker:
+```
+$  apt-cache madison docker-ce
+$ sudo apt-get install docker-ce=<VERSION_STRING> docker-ce-cli=<VERSION_STRING> containerd.io
+```
+
+After the installation, it is important to verify whether the process has been finished correctly by running a test command.
+
+```
+$  sudo docker run hello-world
+```
+
+For us everything worked smoothly so far, so we continued to set up docker.
+
+2. To initiate the set up process after successful installation, we created a directory for a test project, following the instructions form Docker Docs.
+```
+$ mkdir composetest
+$ cd composetest
+```
+Then we had to create a file in a separate text/code editor, naming it ```app.py``` and saving in the test project directory with the given code:
+
+```
+$ import time
+
+$ import redis
+$ from flask import Flask
+
+$ app = Flask(__name__)
+$ cache = redis.Redis(host='redis', port=6379)
+
+$ def get_hit_count():
+    retries = 5
+    while True:
+        try:
+            return cache.incr('hits')
+        except redis.exceptions.ConnectionError as exc:
+            if retries == 0:
+                raise exc
+            retries -= 1
+            time.sleep(0.5)
+
+$ @app.route('/')
+$ def hello():
+    count = get_hit_count()
+    return 'Hello World! I have been seen {} times.\n'.format(count)
+```
+This had to be followed by another file creation, this time ```requirements.txt``` containing only ```flask``` and ```redis```, with the latter being the hostname of the redis container on the network.
+
+3. Having set the groundwork for dockerization, we could now move on to creating a test Dockerfile that will build the Docker image in the end. The Dockerfile is where all the dependencies are stored to be later used by Python.
+
+```
+# syntax=docker/dockerfile:1
+FROM python:3.7-alpine
+WORKDIR /code
+ENV FLASK_APP=app.py
+ENV FLASK_RUN_HOST=0.0.0.0
+RUN apk add --no-cache gcc musl-dev linux-headers
+COPY requirements.txt requirements.txt
+RUN pip install -r requirements.txt
+EXPOSE 5000
+COPY . .
+CMD ["flask", "run"]
+```
+
+This code contains information for Docker about which Python version to use with this Python image, sets directory to ```/code```, copies the current directory to the working directory in the image and sets the command for the container.
+
+One more important file to create before composing a Docker container is the ```docker-compose.yml``` file:
+
+```
+version: "3.9"
+services:
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+  redis:
+    image: "redis:alpine"
+```
+
+This had to be pasted into an empty file in our text editor, specifying the ports to be used by Docker.
+Now we are ready to start the test application.
+
+4. Building and running the test Docker app
+
+By executing the ```$ docker-compose up``` command in the terminal, the machine starts pulling all the lacking locally information and creating the image for our given code whilst starting the processes we defined earlier in the prerequired files. This takes some time when being run for the first time.
+
+Having waited long enough for the machine to finish the task, one may type in ```https://localhost:5000/``` in ther browser and check whether the code worked or not. If everything has been done correctly, like in our case, a "Hello World! I have been seen 1 times." message should appear on the screen. The number of views should change with each time the page is refreshed.
+
+To check whether there are any other local images present, we simply used the
+```
+$ docker image ls
+```
+to list all local images with their respective repositories, tags, image IDs etc.
+
+To stop the application from running, a ```docker-compose down``` command or a Ctrl+C combination would suffice.
+
+5. One step further that we took was addint the bind mount to the test app by editing the ```docker-compose.yml``` file:
+```
+version: "3.9"
+services:
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/code
+    environment:
+      FLASK_ENV: development
+  redis:
+    image: "redis:alpine"
+ ```
+
+ The added ```volumes``` key mounts the project directory to /code inside of the container, taking away the obligation to rebuild the image each time the code must be changed.
+
+ After this, the only steps left in running our test app was to re-build and run the app with already beknownst to us command ```docker-compose up```. We also followed the suggestion from Docker Docs, and modified the app.py file, so that its greeting message sounded differenly:
+
+ ```
+ return 'Hello from Docker! I have been seen {} times.\n'.format(count)
+ ```
+
+ 6. Time to dockerize our own model!
+ 
