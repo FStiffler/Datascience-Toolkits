@@ -64,3 +64,26 @@ $ python3 mnist_convnet.py
 ```
 
 A more detailed report on milestone 1 can be found [here](Reports/report1.md)
+
+## Requirements
+
+### Python packages (including hashes)
+
+numpy == 1.19.5 \
+
+keras == 2.6.0 \
+
+tensorflow == 2.6.0 \
+
+matplotlib == 3.4.3 \
+
+
+## Milestone 2
+
+In the second milestone, we got acquainted with Docker, set up the necessary model training files and actually trained the neural network.
+
+Firstly, we double-checked the .gitignore files to make sure version-control is working on all machines for all contributors. Secondly, we adapted the code to have all the required functionality, i.e. it could load the data, fit a neural network on the data, load a *.h5* file using Keras, and perform predictions using a fitted Keras-based model. We also had to modularize our code, so that its structure would be more maintainable and PEP8 conforming.
+
+Our next step was to create the **requirements.txt** file and download all the required packages in a virtual environment. The aforementioned requirements file would be of great help later on to quickly download the required packages in other envs.
+
+Lastly, we got acquainted with Docker, having installed and set it up on our machines. Although not without extra issues, we managed to create our images and make it run our code.

@@ -1,4 +1,8 @@
+# Virtual environments and similar #
 venv/
 DTA_venv/
 .idea/
+__pycache__/
 
+# File types #
+*.h5
