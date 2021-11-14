@@ -49,3 +49,161 @@ Name | Command | State | Ports
 --|---|---|--
 composetest_redis_1 |  docker-entrypoint.sh redis ... | Up    |  6379/tcp                                
 composetest_web_1   |  flask run         |               Up   |   0.0.0.0:5000->5000/tcp,:::5000->5000/tcp
+
+**4. How does the host machine (e.g. your computer) communicate with the application inside the Docker container. Which ports are exposed from the application to the host machine?**
+
+In the docker file we can see that the port 5000 is exposed from the container. This port is mapped to port 5000 of our local machine in the docker-compose file. Therefore our local machine with the local host IP 127.0.0.1 can communicate with the docker container over the port mapping 5000:5000.
+
+**5. What is localhost, why is it useful in the domain of web applications?**
+
+The "localhost" is the standard name provided to the address of the local computer in a computer network. It is therefore comparable to a domain (i.e google.com) which used to connect to a server with a particular IP address. In the case of "localhost" we connect to our own computer with the default loopback address 127.0.0.1. The localhost domain has several perks:
+
+- It allows to perform connection tests by sending ping requests.
+- It allows developers to test web applications on their local systems first before deploying them on a server exposed to the internet.
+- It allows to block websites from being accessed.
+
+## Task 2: PostgreSQL
+
+### What is PostgreSQL? Is it SQL or NoSQL?
+
+PostgreSQL is a open source object-relational database management system (RDBMS). It is a tool to create, define and transform databases. It applies the SQL-Standard. SQL stands for **S**tructred **Q**uery **L**anguage and is a programming language designed to work with databases. It consists of Data Query Language to make data queries on an existing database, Data Manipulation Language to manipulate the data in a database, Data Definition Language to define data bases and their schemes and Data Control Language to manage access rights to a database.
+
+**SQL database:**
+
+An SQL database is a relational data base where the entries are connected with each other other so called relations. It allows easy queries to connect related data and receive data insights.
+
+**NoSQL:**
+
+NoSQL databases are not relational. They find different ways to store data like for example Key-Value store, Column store, Document store or Graph store. This allows for higher scalability and work with large amount of data.
+
+**Is PostgreSQL now SQL or NoSQL?**
+
+PostgreSQL is a relational database management system in a classical sense. However it has also features to store JSON files which is normally found in NoSQL databases. But since we can only interact with PostgreSQL with SQL, we can't really call it a NoSQL system.
+
+### Run a PostgreSQL Server via Dockerfile
+
+#### Make it running
+
+We did not want to do this task in our current project, so we created new directory `/home/user/Documents/jokes`. After that, the first thing we had to do was to pull the official PostgreSQL image from Docker Hub corresponding to Version 14:0. We looked up the images and the required command for this task [here](https://hub.docker.com/_/postgres):
+
+```sh
+$ docker pull postgres:14
+```
+
+In a next step we wanted to build a container from the image with a name and a password. We used the command from the mentioned website:
+
+```sh
+$ docker run --name postgres -e POSTGRES_PASSWORD=123 -d postgres:14
+```
+
+We checked if our container was running with `docker ps`. The container was now running but we were not yet able to interact with it. Therefore we stopped the container again and started to create a yml file which would grant interaction with a SQL database instance. We followed the instructions on this [websites](https://towardsdatascience.com/how-to-run-postgresql-and-pgadmin-using-docker-3a6a8ae918b5) to obtain a running instance of postgres with pgAdmin. We modified the file a bit to adjust it for our needs however.
+
+```
+version: '3.8'
+services:
+  db:
+    container_name: pg_container
+    image: postgres:14
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: test_db
+    ports:
+      - "5432:5432"
+  pgadmin:
+    container_name: pgadmin4_container
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: 1234
+    ports:
+      - "5050:80"
+```
+
+This docker-compose file composes two containers. The db container which runs on an image of postgres and thus runs PostgreSQL in the container and the pgAdmin container which runs on an image of pgAdmin4. In the db container we defined environment variables such as the user, the password and the database to work on. Furthermore we defined over which ports we want to access the database server. The database server exposes the port 5432 which is mapped to the same port to our local machine. In the pgAdmin container we had to define a user email and a password as well. We mapped the port 5000 of our local machine to the port 80 of the docker container. Finally we ran `docker-compose up` to create the a running instance of the images. Since pgAdmin is a webbased client we were now able access it over our localhost and the defined port `localhost:5050`. We entered the email address and password defined in the docker-compose file and had now access to pgAdmin. Since we did not yet add a database server to our running instance of pgAdmin, we had to do that according to the description on the [websites](https://towardsdatascience.com/how-to-run-postgresql-and-pgadmin-using-docker-3a6a8ae918b5). We named the server *jokes_server*. After that we had to follow the instructions to find out the IP address on which the database server was running. So we looked at the containers with `docker ps`:
+
+CONTAINER ID | IMAGE | COMMAND | CREATED | STATUS | PORTS | NAMES
+... | ... | ... | ... | ... | ... | ...
+51c3e0a71646 |  postgres:14   |   "docker-entrypoint.s…"  | 20 minutes ago  | Up 5 minutes  |  0.0.0.0:5432->5432/tcp, :::5432->5432/tcp   |  pg_container
+3f561c1d0bb7 |  dpage/pgadmin4 |  "/entrypoint.sh"  |    20 minutes ago  |  Up 5 minutes  |  443/tcp, 0.0.0.0:5050->80/tcp, :::5050->80/tcp  | pgadmin4_container
+
+We saw on which ports the containers are running but not on which IP address. Therefore we had to dig deeper with `docker inspect pg_container | grep IPAddress`. From that information we saw that the container was running on the IP `172.18.0.2` We added this information to the host information and saved everything. Now we had a connection to the server and were also able to see our already created test database called *test_db*. An even easier way to connect to the postgres server would be to add the name of the container to the host name.
+
+#### Docker volumes
+
+To see what happens to stored data in our database we created a table and inserted data into it via SQL script. After that we stopped our docker containers with `docker-compose down` and restarted it right away. We saw, that we had to reconnect to the postgres server from scratch and that our table with data was gone. Based on this information we knew, that we had to mount volumes to our container which would store the data of the container even when we stop them from running. Therefore we further adjusted the yml file based on information obtained on [DockerHub](https://hub.docker.com/_/postgres) and on the [website of pgAdmin](https://www.pgadmin.org/docs/pgadmin4/development/container_deployment.html):
+```
+version: '3.8'
+services:
+  db:
+    container_name: pg_container
+    image: postgres:14
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: test_db
+      PGDATA: /var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  pgadmin:
+    container_name: pgadmin4_container
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: 1234
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin    
+```
+
+When we ran this we got an error message:
+
+```
+ERROR: Named volume "db_data:/var/lib/postgresql/data:rw" is used in service "db" but no declaration was found in the volumes section.
+```
+
+Upon some internet research it became clear that we have to define the volumes to use in a separate volumes section. And since we have no volumes yet, we have to create them first. A way to do both in the same yml file is depicted in the following code:
+
+```
+version: '3.8'
+services:
+  db:
+    container_name: pg_container
+    image: postgres:14
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: test_db
+      PGDATA: /var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  pgadmin:
+    container_name: pgadmin4_container
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: 1234
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin   
+
+volumes:
+  postgres_data:
+  pgadmin_data:
+```
+
+This code creates two docker volumes which store all the data of pgAdmin and postgres locally and thus should store changes we make to our database. We tried it out by rerunning the the docker-compose file and adding data to our database. Then we brought the containers down and restarted them again. This time everything was still there. On the pgAdmin page we could reconnect to our defined postgres server and in the server we were able to make a query on our database to receive the previously introduced data. 
