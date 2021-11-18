@@ -293,6 +293,9 @@ jokes = cur.fetchall()
 for row in jokes:
         print("Id = ", row[0], )
         print("Joke = ", row[1])
+
+# Close connection
+con.close()
 ```
 
 #### Is the joke still there?
