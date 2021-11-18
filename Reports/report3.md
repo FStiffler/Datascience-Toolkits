@@ -133,7 +133,7 @@ We saw on which ports the containers are running but not on which IP address. Th
 
 #### Docker volumes
 
-To see what happens to stored data in our database we created a table and inserted data into it via SQL script. After that we stopped our docker containers with `docker-compose down` and restarted it right away. We saw, that we had to reconnect to the postgres server from scratch and that our table with data was gone. Based on this information we knew, that we had to mount volumes to our container which would store the data of the container even when we stop them from running. Therefore we further adjusted the yml file based on information obtained on [DockerHub](https://hub.docker.com/_/postgres) and on the [website of pgAdmin](https://www.pgadmin.org/docs/pgadmin4/development/container_deployment.html):
+To see what happens to stored data in our database we created a table and inserted data into it via SQL script. After that we stopped and removed our docker containers with `docker-compose down`. Then we created new containers again with `docker-compose up`. We saw, that we had to reconnect to the postgres server from scratch and that our table with data was gone. Based on this information we knew, that we had to mount volumes to our container which would store the data of the container even when we remove them. Therefore we further adjusted the yml file based on information obtained on [DockerHub](https://hub.docker.com/_/postgres) and on the [website of pgAdmin](https://www.pgadmin.org/docs/pgadmin4/development/container_deployment.html):
 ```
 version: '3.8'
 services:
@@ -206,4 +206,95 @@ volumes:
   pgadmin_data:
 ```
 
-This code creates two docker volumes which store all the data of pgAdmin and postgres locally and thus should store changes we make to our database. We tried it out by rerunning the the docker-compose file and adding data to our database. Then we brought the containers down and restarted them again. This time everything was still there. On the pgAdmin page we could reconnect to our defined postgres server and in the server we were able to make a query on our database to receive the previously introduced data. 
+This code creates two docker volumes which store all the data of pgAdmin and postgres locally and thus should store changes we make to our database. We tried it out by rerunning the the docker-compose file and adding data to our database. Then we removed the containers and created them again. This time everything was still there. On the pgAdmin page we could reconnect to our defined postgres server and in the server we were able to make a query on our database to receive the previously introduced data.
+
+#### Python script to store joke in DB
+
+Since we work in another project folder and we didn't want to pollute our project python environment, we created a new python environment in the `jokes` directory called *jokes* as well and activated that. After that we searched for a python package to communicate with our SQL database. We stumbled upon this [website](https://www.postgresqltutorial.com/postgresql-python/connect/) when we searched for solutions. The package used is `psycopg2`. When we tried to install the package with `pip install psycopg2`, however, we got a ton of error messages. Therefore, we searched for solutions and found an easy fix by just installing the standalone binary package `psycopg2-binary`. Now we had to create a python file to interact with our database server. First we tried to just create the database.
+
+```
+# Import package
+import psycopg2
+
+# Establish connection to sql server
+con = psycopg2.connect(
+    host="172.18.0.2",
+    port="5432",
+    database="test_db",
+    user="admin",
+    password="1234")
+
+# Creat cursor
+cur = con.cursor()
+
+# Create new database 'ms3_jokes'
+sql = '''CREATE DATABASE ms3_jokes''';
+cur.execute(sql)
+
+```
+When we ran the file with `python3 jokes.py`, we got an error message saying `psycopg2.errors.ActiveSqlTransaction: CREATE DATABASE cannot run inside a transaction block`. The problem seems to be that psycopg2 automatically starts a transaction when connecting to a database. We have to turn that off and allow autocommit with `<connection_name>.autocommit = True`. After we adjusted our python script with this line of code we were able to see the newly created database in pgAdmin. The next step was to create a table. We added the according command to python. But when we ran the file once again we saw that the table was created in our *test_db* defined in the docker compose file. So we figured that we had to close the connection to this database after we have created the new database *ms3_jokes* and establish a new connection. The last step was to insert a joke into our table and querie it again to print it to the console. With this final code everything worked perfectly:
+
+```
+# Import package
+import psycopg2
+
+# Establish connection to test_db
+con = psycopg2.connect(
+    host="172.18.0.2",
+    port="5432",
+    database="test_db",
+    user="admin",
+    password="1234")
+
+# Turn off transaction mode and enable autocommit
+con.autocommit = True
+
+# Creat cursor
+cur = con.cursor()
+
+# Create new database 'ms3_jokes'
+cur.execute('CREATE DATABASE ms3_jokes')
+
+# Close connection
+con.close()
+
+# Create connection with new database
+# Establish connection to test_db
+con = psycopg2.connect(
+    host="172.18.0.2",
+    port="5432",
+    database="ms3_jokes",
+    user="admin",
+    password="1234")
+
+# Turn off transaction mode and enable autocommit
+con.autocommit = True
+
+# Creat cursor
+cur = con.cursor()
+
+# Create a new table
+cur.execute('''CREATE TABLE jokes (
+    ID int PRIMARY KEY
+        GENERATED ALWAYS AS IDENTITY,
+    JOKE text
+    )''')
+
+# Insert joke
+cur.execute('''INSERT INTO jokes (JOKE) VALUES (
+    'When I wrote this code, only me and God knew how it works. Now only God knows...'
+    )''')
+
+# Selet joke
+cur.execute('SELECT * FROM jokes')
+
+# Print jokes
+jokes = cur.fetchall()
+for row in jokes:
+        print("Id = ", row[0], )
+        print("Joke = ", row[1])
+```
+
+#### Is the joke still there?
+
+The last task was to check if our joke is still there after we removed the containers with `docker-compose down` and recreate them with `docker-compose up`. Theoretically it should work since we have done it before without the python script. Luckily our expectations were met. The joke was still there after recreating the containers. Task 2 check!
