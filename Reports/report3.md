@@ -301,3 +301,46 @@ con.close()
 #### Is the joke still there?
 
 The last task was to check if our joke is still there after we removed the containers with `docker-compose down` and recreate them with `docker-compose up`. Theoretically it should work since we have done it before without the python script. Luckily our expectations were met. The joke was still there after recreating the containers. Task 2 check!
+
+
+## Task 3: Storing images to relational databases
+
+### How do you need to represent/transform image data to save it to a relational database?
+
+To answer this question we searched the web for answers and came across a [webpage](https://howtodiscuss.com/t/store-image-in-postgres/79153) on which it is explained how to insert images into a PostgreSQL database and another [webpage](https://www.futurelearn.com/info/courses/programming-103-data/0/steps/64743) explaining how the raw data of images is stored on a computer. It appears that images are binary data consisting of raw bytes which is not human readable. This is why they can be stored as BLOB data type or in case of PostgreSQL as BYTEA data type in a relational database. Both data types represent binary data and allow storage of binary strings. However, storing images as BLOBs or BYTEAs is not recommended.
+
+Another way to store images in a database (though indirectly) is by storing the file path to the picture in the file system in the database. Meta information about the pictures is provided in additional database table columns.
+
+### Look at your own dataset
+
+**1. How is your data structured?**
+
+When the mnist data is loaded in [data_prepared.py](../original/mnist_convnet.py), the pictures are represented as numpy array with shape (70000, 28, 28). So we have a total of 70000 pictures in the training and test set with 28 times 28 pixels. In order to be used with the Keras API we have to transform the array to the form (70000, 28, 28, 1). But how do we have to reshape the data in order to insert it into a relational database?
+
+**2. Explain how you would define your relational database tables in terms of their attributes to save your data. What kind of data types could you us?**
+
+Obviously we will have to work with some sort of array data type and not with binary data type as described before. We looked at the provided [link](https://www.postgresql.org/docs/12/datatype.html) and saw, that an array data type exists. But after hours of research about how we now can insert our numpy arrays into a database as array as well, we realized that there is no way to do it. However, we found out that we can convert our numpy array to bytes and back using the package `pickle`. We find a instruction on how to do it [here](https://stackoverflow.com/questions/60278766/best-way-to-insert-python-numpy-array-into-postgresql-database). So we tried it out with one picture of our mnist dataset.
+
+```
+# Import package
+import pickle
+
+# Select test example
+test = x_train[1]
+
+# Return the array as byte stream
+test_bytes = pickle.dumps(test)
+
+# Transform back to original array
+test_back = pickle.loads(test_bytes)
+
+```
+This worked perfectly. So we knew we can load data, transform it to a byte stream, read it into a database as datatype bytea and reload it. As for the structure of our database, we thought about creating one single table with all the data. This would require us to add at least a column of type boolean for training. If a value in this column is `true` or `1`, we know that the observations belongs to the training data. When it is `false` or `0`, we know that the observation must be from the test data. Another column of data type int would be used to store the picture labels (actual handwritten digit in picture). So our table, for example, could look like this:
+
+ID | Picture | Training | Label
+... | ... | ... | ...
+1 | <byte_stream> | 1 | 3
+
+**3. What additional relational database table attributes might make sense to easily query your data?**
+
+We could think of horizontal partitioning so that we can store our data the same way as we load it into python (x_training, y_training, x_test, y_test). But then we would have to create and query four different tables. That is quite unhandy. As for additional attributes, we could maybe add additional meta data to the pictures but since we are not given any, this is not an option. 
