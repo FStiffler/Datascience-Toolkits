@@ -13,6 +13,10 @@ $ hashin matplotlib==3.4.3
 
 However we realized that we have several hashes for the same package. Therefore we deleted the environment to install the packages once more and add the hashes. After we have installed the packages with `pip install -r requirements.txt`, we ran the commands listed above once again. Now our *requirements.txt* file was again extended with several hash digests. We accepted our faith and added all the hashes to the table under *Requirements* in the *README.md* file. However, we deleted them again from the requirements file for more reader friendly experience.
 
+**Addendum**
+
+We asked why so many hashes are generated in the lecture. Arthur informed us that, first of all we can simply look up the hashes for a package on PyPI when going on package site, selecting *download files* and then click *view* (And we spend so much time to find out how to generate those exact hashes) and second of all, we were also informed that packages come with different wheels optimized for the computer architecture the package is running on. We generated one hash for every wheel which is why we have that many hashes. We decided to keep all the hashes already created (since we do not actually know which wheel is used and Arthur told us it is not that important). For additional packages we are going to add wheels as well.
+
 
 ## Task 1: Docker Compose
 
@@ -343,4 +347,6 @@ ID | Picture | Training | Label
 
 **3. What additional relational database table attributes might make sense to easily query your data?**
 
-We could think of horizontal partitioning so that we can store our data the same way as we load it into python (x_training, y_training, x_test, y_test). But then we would have to create and query four different tables. That is quite unhandy. As for additional attributes, we could maybe add additional meta data to the pictures but since we are not given any, this is not an option. 
+We could think of horizontal partitioning so that we can store our data the same way as we load it into python (x_training, y_training, x_test, y_test). But then we would have to create and query four different tables. That is quite unhandy. As for additional attributes, we could maybe add additional meta data to the pictures but since we are not given any, this is not an option.
+
+### Repeat Task 2
