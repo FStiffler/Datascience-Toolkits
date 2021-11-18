@@ -349,4 +349,110 @@ ID | Picture | Training | Label
 
 We could think of horizontal partitioning so that we can store our data the same way as we load it into python (x_training, y_training, x_test, y_test). But then we would have to create and query four different tables. That is quite unhandy. As for additional attributes, we could maybe add additional meta data to the pictures but since we are not given any, this is not an option.
 
-### Repeat Task 2
+### Repeat Task 2 for own dataset
+
+To repeat task 2 but now with our own data we created a new directory `m3t3` in our project directory this time. We copied the docker compose and python file from task 2 into this directory because we decided to build upon this code.
+
+**First Step**
+
+The first step was to adjust the docker compose file. We added new volumes since the volumes initially created for task 2 might be still used if we wanted to compare something. Furthermore, we renamed the database to be initialized:
+
+```
+version: '3.8'
+services:
+  db:
+    container_name: pg_container
+    image: postgres:14
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: task3
+      PGDATA: /var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_dataT3:/var/lib/postgresql/data
+
+  pgadmin:
+    container_name: pgadmin4_container
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: 1234
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_dataT3:/var/lib/pgadmin
+
+volumes:
+  postgres_dataT3:
+  pgadmin_dataT3:
+```
+After that we ran `docker-compose up`, opened a browser, logged into pgAdmin, added the SQL Server and checked if the *task3* database is there already. Everything was fine.
+
+**Second Step**
+
+The next step was to prepare the python file. Before we could prepare the file, however, we had to activate our personal environments for the project and install the psycopg2 package just like we did for Task 2. After that we created a python file with the following abilities:
+
+ *1. Load mnist data*
+
+Here we could simply use the module [load_data.py](../code/load_data.py) created in milestone 2 already.
+
+ *2. Take one picture as sample*
+
+We took the first picture
+
+ *3. Show picture*
+
+Here we used the `Pillow` package as indicated in the Milestone description. Because `Pillow` is already integrated in matplotlib which we have already installed, no further installation process is required. We can import the required functionality to show the picture with `from PIL import Image`
+
+ *4. Transform picture to byte stream*
+
+For this ability the package `pickle` has to be installed. This is a standard library and thus does not need to be installed specifically.
+
+ *5. Create table to insert transformed sample picture into*
+
+We had to connect to the database first and then we were able to create a new table.
+
+ *6. Insert sample picture into table*
+
+ Here we had some troubles at first. We used the following code:
+
+ ```
+ cur.execute(
+    """
+    INSERT INTO pictures (Picture)
+    VALUES (%s)
+    """,
+    (sample_bytes)
+)
+
+ ```
+Since our SQL Table contains a ID which auto increments, we only have to define the bytea value to be inserted. One problem though. We always got an error and we couldn't figure out what the problem was for a long time just to remember that a tuple with one value needs a comma nevertheless. So we fixed it.
+
+```
+cur.execute(
+   """
+   INSERT INTO pictures (Picture)
+   VALUES (%s)
+   """,
+   (sample_bytes, )
+)
+
+```
+
+ *7. Reload sample picture from database*
+
+Simple SQL statement to query the data.
+
+ *8. Recreate object from byte stream*
+
+Here we had to use `pickle` again to retransform the bytes stream.
+
+ *9. Visualize the picture again to check if the picture transformation has worked*
+
+
+
+Now that we had a python file which we tested step by step we wanted to run everything from scratch. So we deleted the table in our database and removed the containers. Then we restarted the containers and ran the file with `python task3.py`. But we were not able to connect to the database. After inspecting the container we realized, that the IP address of the PostgreSQL container has changed and since we defined the IP in the python file directly, the file is no longer able to find the database host. Therefore, we replaced `host=127.30.0.2` with `host=pg_container`. We based this idea on the earlier discovery that we can log into our server by simply defining the name of the host container and not the IP address. Sadly this did not work. So we tried to assign a static IP address to the container. But without luck. After a lot wasted time we searched for a different approach. Finally we found a solution which stated that we simply have to replace the actual IP address in the python file which is used to connect to the database by the string `localhost`. After we changed the file accordingly we were able to connect to our database and run the file successfully. The sample picture was shown before and after it was inserted into the database and it looked the exact same twice.
