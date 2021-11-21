@@ -1,0 +1,56 @@
+version: '3.8'
+services:
+  db:
+    container_name: pg_container
+    image: postgres:14
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: milestone_3
+      PGDATA: /var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  pgadmin:
+    container_name: pgadmin4_container
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: 1234
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+
+  python:
+    build: .
+    depends_on:
+      - db
+###command: ["./wait-for-it.sh", "db:5432", "--", "python", "app.py"]
+    ports:
+      - "5000:5000"
+
+volumes:
+  postgres_data:
+  pgadmin_data:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
