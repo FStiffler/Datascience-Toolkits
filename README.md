@@ -206,3 +206,9 @@ matplotlib==3.4.3 \
         --hash=sha256:e322a68df29c2bfde411c7cd8ff605b5d1664b7e477b7632a5903c719305474c \
         --hash=sha256:f361bb6166bafba2ebef3658a0511cf2f4018d698092a3e39f2c61bd6fb1039b \
         --hash=sha256:f703037f4833568fb60ba6157bbf0b447381c6c0d8a27cbd9841009220a9dca4
+
+
+### Milestone 3
+In this project we had to create a release that would contain our dockerized code within a running database postgres server. Furthermore, that database was supposed to contain newly created and filled in tables for both input data and the resulting predictions from our chosen input sample.
+To connect our containers to each other via a network and make them run in a specific order first and then simultaneously, we created a specific docker-compose file and a modified Dockerfile, dealing with Postgres database and our own created db.
+Having created a database in a docker-compose file, we initialized a table in a python code and ran a joke-storing code in there. After this practice, we could proceed to retrace these steps with our original trained model. This relational database we created allowed us to store both input and prediction data of our model into itself with the help of Docker compose and the postgres. Several additional modules and libraries were also used to this aim.
