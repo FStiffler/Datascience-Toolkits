@@ -567,7 +567,9 @@ if ('milestone_3',) not in db_list:
         ''')
 ```
 
-In the first half of our code, we import all the necessary python modules for model training and database operation. We proceed by connecting to the postgres database initialised by the docker-compose file described above, and subsequently create a new database called "milestone_3", having previously checked if it doesn't already exist from our long list of tries and fails. Once the database is successfully created, we finish the setup by creating the required tables, i.e. for input data and predictions.
+In the first half of our code, we import all the necessary python modules for model training and database operation. We proceed by connecting to the postgres database initialised by the docker-compose file described above, and subsequently create a new database called "milestone_3", having previously checked if it doesn't already exist from our long list of tries and fails. Once the database is successfully created, we finish the setup by creating the required tables, i.e. for input data and predictions. The database has the following structure:
+
+![ERD](ERD.svg)
 
 ```
 # import already existing module
@@ -637,9 +639,198 @@ cur.execute(
 In the last half of our code, we load the data from our already existing module, select our sample picture and transform it to byte stream in order for it to be processed, later retransforming it back into a sample object. Having completed that step and visualized the picture we got, we imported the model to "mnist_convnet_model.h5" file, which will also be dockerized.
 However, when we started transforming the data to be predicted, we ran into a problem with our selected sample - the model expected shape (x, 28, 28, 1), which would be possible to get only if we were testing the model on more than one sample units. Nonetheless, we decided to proceed with a single sample, since it was required by the instructions, and the model eventually worked with only one sample.
 Our final step was to insert the resulting predictions into our previously created predictions table.
-It is evident that a large part of this python file is based on our previous work, yet it can also be seen that this code required a lot of additions and changes to run properly.
+It is evident that a large part of this python file is based on our previous work, yet it can also be seen that this code required a lot of additions and changes to run properly. We tested everything by running the file outside the container and establishing the a connection via localhost. We detected several bugs in the code which we had to remove. Our final code looked as follows:
 
-### Database Structure ERD
+```
+# laying out the basis from previous tasks and/or Milestones
 
-![Alt text](https://github.com/FStiffler/Datascience-Toolkits/blob/086d554df87487166d0cb4069121cfeed03a8fb2/ERD.svg)
-<img src="https://github.com/FStiffler/Datascience-Toolkits/blob/086d554df87487166d0cb4069121cfeed03a8fb2/ERD.svg">
+import psycopg2
+import numpy as np
+from tensorflow import keras
+import pickle
+from PIL import Image
+import os
+
+# connect to postgres db initalised by docker compose
+con = psycopg2.connect(
+    host="db",
+    port="5432",
+    database="postgres",
+    user="admin",
+    password="1234")
+
+# Turn off transaction mode and enable autocommit
+con.autocommit = True
+
+# Creat cursor
+cur = con.cursor()
+
+# Create new database 'milestone_3' if not existing y_test
+cur.execute('SELECT datname FROM pg_database;')
+db_list = cur.fetchall()
+
+if ('milestone_3',) not in db_list:
+
+    # create database milestone
+    cur.execute('CREATE DATABASE milestone_3')
+
+# Close connection
+con.close()
+
+# connect to postgres db initalised by docker compose
+con = psycopg2.connect(
+    host="db",
+    port="5432",
+    database="milestone_3",
+    user="admin",
+    password="1234")
+
+# Turn off transaction mode and enable autocommit
+con.autocommit = True
+
+# Creat cursor
+cur = con.cursor()
+
+# creating the input data table
+cur.execute('''
+    CREATE TABLE input_data (
+    InputID int PRIMARY KEY
+        GENERATED ALWAYS AS IDENTITY,
+    Picture bytea,
+    Label int);
+    ''')
+
+# creating the predictions table
+cur.execute('''
+    CREATE TABLE predictions (
+    PredictionID int PRIMARY KEY
+        GENERATED ALWAYS AS IDENTITY,
+    InputID int
+        REFERENCES input_data(InputID),
+    prediction int);
+    ''')
+
+# import already existing module
+from data_load import load_data
+
+# load data
+x_train, y_train, x_test, y_test = load_data()
+
+# take first picture of training data as sample
+sample = x_train[0]
+sample_label = int(y_train[0])
+
+# Visualize picture
+Image.fromarray(sample).show()
+
+# Transform picture to byte stream
+sample_bytes = pickle.dumps(sample)
+
+# Insert picture to input table
+cur.execute(
+    """
+    INSERT INTO input_data (Picture, Label)
+    VALUES (%s, %s)
+    """,
+    (sample_bytes, sample_label))
+
+# Select transformed sample from input table and store it as python object
+cur.execute('SELECT Picture FROM input_data')
+sample_bytes_loaded = cur.fetchone()[0]
+
+# Select transformed sample from input table and store it as python object
+cur.execute('SELECT InputID FROM input_data')
+sample_ID = int(cur.fetchone()[0])
+
+# Retransform to object
+sample_back = pickle.loads(sample_bytes_loaded)
+
+# Visualize picture
+Image.fromarray(sample_back).show()
+
+# import model
+model_name = "mnist_convnet_model.h5"  # how the model shall be named
+model_save_dir = os.path.join(os.getcwd(), 'saved_models')  # relative path to save models in
+from handling_model import load_model
+model = load_model(model_save_dir, model_name)
+
+# transform data to be predicted
+sample_back = sample_back.astype("float32") / 255
+sample_back = np.expand_dims(sample_back, -1)
+sample_back_final = np.array([sample_back])  # Model expects shape (x, 28, 28, 1)
+
+# make predictions
+predictions = model.predict(sample_back_final)
+
+# final prediction
+final_pred = int(np.argmax(predictions[0]))
+
+# Insert predictions into table
+cur.execute(
+    """
+    INSERT INTO predictions (InputID, prediction)
+    VALUES (%s, %s)
+    """,
+    (sample_ID, final_pred))
+```
+
+Last but not least our final goal was to create a container which would run this file as part of docker compose. We spent a lot of time in order to get it up and running but we had no success. We realized that our requirements file was not up to date so we could not import all the correct packages. We also struggled to find out how we can define a volume which would directly allow access to the python modules in our project folder. Eventually we found a solution. Our dockerfile looked like this:
+
+```
+FROM python:3.8
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+
+CMD python code/main.py
+CMD python code/Task4.py
+```
+
+Our docker-compose file:
+
+```
+version: '3.8'
+services:
+  db:
+    container_name: pg_container
+    image: postgres:14
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: postgres
+      PGDATA: /var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  pgadmin:
+    container_name: pgadmin4_container
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: 1234
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+
+  python:
+    build: .
+    depends_on:
+      - db
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/app
+
+volumes:
+  postgres_data:
+  pgadmin_data:
+```
+
+Before we ran the file we deleted all the old images and containers to build a completly new image and start new containers on this new image. Then we ran `docker-compose up` and logged in to pgAdmin we saw the new database with both tables and the sample data in it. So it worked. 
