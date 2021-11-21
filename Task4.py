@@ -14,20 +14,38 @@ con = psycopg2.connect(
     user="admin",
     password="1234")
 
+# Turn off transaction mode and enable autocommit
+con.autocommit = True
+
+# Creat cursor
 cur = con.cursor()
+
+# Create new database 'milestone_3' if not existing y_test
+db_list = cur.execute('SELECT datname FROM pg_database;')
+
+if 'milestone_3' not in db_list:
+    cur.execute('CREATE DATABASE milestone_3')
+
+# Close connection
+con.close()
 
 # creating the input data table
 cur.execute('''
     CREATE TABLE input_data (
-    ID SERIAL PRIMARY KEY,
-    input_label TEXT);
+    Input_ID int PRIMARY KEY
+        GENERATED ALWAYS AS IDENTITY,
+    Picture bytea,
+    Label int);
     ''')
 
 # creating the predictions table
 cur.execute('''
     CREATE TABLE predictions (
-    ID SERIAL PRIMARY KEY,
-    prediction TEXT);
+    Prediction_ID int PRIMARY KEY
+        GENERATED ALWAYS AS IDENTITY,
+    Input_ID int
+        REFERENCES input_data(Input_ID)
+    prediction int);
     ''')
 
 # import already existing module
