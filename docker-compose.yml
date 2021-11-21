@@ -7,7 +7,7 @@ services:
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: 1234
-      POSTGRES_DB: milestone_3
+      POSTGRES_DB: postgres
       PGDATA: /var/lib/postgresql/data
     ports:
       - "5432:5432"
@@ -37,20 +37,3 @@ services:
 volumes:
   postgres_data:
   pgadmin_data:
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

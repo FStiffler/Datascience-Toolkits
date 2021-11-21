@@ -6,18 +6,11 @@ from tensorflow import keras
 import pickle
 from PIL import Image
 
-
-host = "localhost"
-database = "milestone_3"
-port = "5432"
-user = "admin"
-password = "1234"
-
-
+# connect to postgres db initalised by docker compose
 con = psycopg2.connect(
-    host="localhost",
+    host="db",
     port="5432",
-    database="milestone_3",
+    database="postgres",
     user="admin",
     password="1234")
 
