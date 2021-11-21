@@ -10,6 +10,7 @@ import os
 # connect to postgres db initalised by docker compose
 con = psycopg2.connect(
     host="db",
+    port="5432",
     database="postgres",
     user="admin",
     password="1234")
@@ -29,27 +30,6 @@ if ('milestone_3',) not in db_list:
     # create database milestone
     cur.execute('CREATE DATABASE milestone_3')
 
-    # creating the input data table
-    cur.execute('''
-        CREATE TABLE input_data (
-        Input_ID int PRIMARY KEY
-            GENERATED ALWAYS AS IDENTITY,
-        Picture bytea,
-        Label int);
-        ''')
-
-    # creating the predictions table
-    cur.execute('''
-        CREATE TABLE predictions (
-        Prediction_ID int PRIMARY KEY
-            GENERATED ALWAYS AS IDENTITY,
-        Input_ID int
-            REFERENCES input_data(Input_ID),
-        prediction int);
-        ''')
-
-
-
 # Close connection
 con.close()
 
@@ -66,6 +46,25 @@ con.autocommit = True
 
 # Creat cursor
 cur = con.cursor()
+
+# creating the input data table
+cur.execute('''
+    CREATE TABLE input_data (
+    InputID int PRIMARY KEY
+        GENERATED ALWAYS AS IDENTITY,
+    Picture bytea,
+    Label int);
+    ''')
+
+# creating the predictions table
+cur.execute('''
+    CREATE TABLE predictions (
+    PredictionID int PRIMARY KEY
+        GENERATED ALWAYS AS IDENTITY,
+    InputID int
+        REFERENCES input_data(InputID),
+    prediction int);
+    ''')
 
 # import already existing module
 from data_load import load_data
@@ -96,7 +95,7 @@ cur.execute('SELECT Picture FROM input_data')
 sample_bytes_loaded = cur.fetchone()[0]
 
 # Select transformed sample from input table and store it as python object
-cur.execute('SELECT Input_ID FROM input_data')
+cur.execute('SELECT InputID FROM input_data')
 sample_ID = int(cur.fetchone()[0])
 
 # Retransform to object
@@ -107,7 +106,7 @@ Image.fromarray(sample_back).show()
 
 # import model
 model_name = "mnist_convnet_model.h5"  # how the model shall be named
-model_save_dir = os.path.join(os.getcwd(), 'code/saved_models')  # relative path to save models in
+model_save_dir = os.path.join(os.getcwd(), 'saved_models')  # relative path to save models in
 from handling_model import load_model
 model = load_model(model_save_dir, model_name)
 
@@ -125,12 +124,7 @@ final_pred = int(np.argmax(predictions[0]))
 # Insert predictions into table
 cur.execute(
     """
-    INSERT INTO predictions (Input_Id, prediction)
+    INSERT INTO predictions (InputID, prediction)
     VALUES (%s, %s)
     """,
     (sample_ID, final_pred))
-
-
-
-
-
