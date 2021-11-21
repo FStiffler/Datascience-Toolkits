@@ -5,11 +5,11 @@ import numpy as np
 from tensorflow import keras
 import pickle
 from PIL import Image
+import os
 
 # connect to postgres db initalised by docker compose
 con = psycopg2.connect(
     host="db",
-    port="5432",
     database="postgres",
     user="admin",
     password="1234")
@@ -21,45 +21,61 @@ con.autocommit = True
 cur = con.cursor()
 
 # Create new database 'milestone_3' if not existing y_test
-db_list = cur.execute('SELECT datname FROM pg_database;')
+cur.execute('SELECT datname FROM pg_database;')
+db_list = cur.fetchall()
 
-if 'milestone_3' not in db_list:
+if ('milestone_3',) not in db_list:
+
+    # create database milestone
     cur.execute('CREATE DATABASE milestone_3')
+
+    # creating the input data table
+    cur.execute('''
+        CREATE TABLE input_data (
+        Input_ID int PRIMARY KEY
+            GENERATED ALWAYS AS IDENTITY,
+        Picture bytea,
+        Label int);
+        ''')
+
+    # creating the predictions table
+    cur.execute('''
+        CREATE TABLE predictions (
+        Prediction_ID int PRIMARY KEY
+            GENERATED ALWAYS AS IDENTITY,
+        Input_ID int
+            REFERENCES input_data(Input_ID),
+        prediction int);
+        ''')
+
+
 
 # Close connection
 con.close()
 
-# creating the input data table
-cur.execute('''
-    CREATE TABLE input_data (
-    Input_ID int PRIMARY KEY
-        GENERATED ALWAYS AS IDENTITY,
-    Picture bytea,
-    Label int);
-    ''')
+# connect to postgres db initalised by docker compose
+con = psycopg2.connect(
+    host="db",
+    port="5432",
+    database="milestone_3",
+    user="admin",
+    password="1234")
 
-# creating the predictions table
-cur.execute('''
-    CREATE TABLE predictions (
-    Prediction_ID int PRIMARY KEY
-        GENERATED ALWAYS AS IDENTITY,
-    Input_ID int
-        REFERENCES input_data(Input_ID)
-    prediction int);
-    ''')
+# Turn off transaction mode and enable autocommit
+con.autocommit = True
+
+# Creat cursor
+cur = con.cursor()
 
 # import already existing module
 from data_load import load_data
 
-
-# Load and store the sample image from data
-
-# [1]
 # load data
 x_train, y_train, x_test, y_test = load_data()
 
 # take first picture of training data as sample
 sample = x_train[0]
+sample_label = int(y_train[0])
 
 # Visualize picture
 Image.fromarray(sample).show()
@@ -67,45 +83,54 @@ Image.fromarray(sample).show()
 # Transform picture to byte stream
 sample_bytes = pickle.dumps(sample)
 
-cur = con.cursor()
+# Insert picture to input table
 cur.execute(
     """
-    INSERT INTO input_data (Picture)
-    VALUES (%s)
+    INSERT INTO input_data (Picture, Label)
+    VALUES (%s, %s)
     """,
-    (sample_bytes, ))
+    (sample_bytes, sample_label))
 
-# [2]
-# take first picture of training data as sample
-sample = x_train[0]
+# Select transformed sample from input table and store it as python object
+cur.execute('SELECT Picture FROM input_data')
+sample_bytes_loaded = cur.fetchone()[0]
+
+# Select transformed sample from input table and store it as python object
+cur.execute('SELECT Input_ID FROM input_data')
+sample_ID = int(cur.fetchone()[0])
+
+# Retransform to object
+sample_back = pickle.loads(sample_bytes_loaded)
 
 # Visualize picture
-Image.fromarray(sample).show()
+Image.fromarray(sample_back).show()
 
-# Transform picture to byte stream
-sample_bytes = pickle.dumps(sample)
+# import model
+model_name = "mnist_convnet_model.h5"  # how the model shall be named
+model_save_dir = os.path.join(os.getcwd(), 'code/saved_models')  # relative path to save models in
+from handling_model import load_model
+model = load_model(model_save_dir, model_name)
 
-cur = con.cursor()
+# transform data to be predicted
+sample_back = sample_back.astype("float32") / 255
+sample_back = np.expand_dims(sample_back, -1)
+sample_back_final = np.array([sample_back])  # Model expects shape (x, 28, 28, 1)
+
+# make predictions
+predictions = model.predict(sample_back_final)
+
+# final prediction
+final_pred = int(np.argmax(predictions[0]))
+
+# Insert predictions into table
 cur.execute(
     """
-    INSERT INTO predictions (Picture)
-    VALUES (%s)
+    INSERT INTO predictions (Input_Id, prediction)
+    VALUES (%s, %s)
     """,
-    (sample_bytes, ))
-
-# executing query
-cur.execute("select * from input_data;")
-print("The sample input tested:")
-print(cur.fetchall())
+    (sample_ID, final_pred))
 
 
-cur.execute("select * from predictions;")
-print("The produced prediction from the tested sample:")
-print(cur.fetchall())
 
 
-# commit data to db
-con.commit()
 
-
-con.close()
