@@ -456,3 +456,381 @@ Here we had to use `pickle` again to retransform the bytes stream.
 
 
 Now that we had a python file which we tested step by step we wanted to run everything from scratch. So we deleted the table in our database and removed the containers. Then we restarted the containers and ran the file with `python task3.py`. But we were not able to connect to the database. After inspecting the container we realized, that the IP address of the PostgreSQL container has changed and since we defined the IP in the python file directly, the file is no longer able to find the database host. Therefore, we replaced `host=127.30.0.2` with `host=pg_container`. We based this idea on the earlier discovery that we can log into our server by simply defining the name of the host container and not the IP address. Sadly this did not work. So we tried to assign a static IP address to the container. But without luck. After a lot wasted time we searched for a different approach. Finally we found a solution which stated that we simply have to replace the actual IP address in the python file which is used to connect to the database by the string `localhost`. After we changed the file accordingly we were able to connect to our database and run the file successfully. The sample picture was shown before and after it was inserted into the database and it looked the exact same twice.
+
+
+
+## Task 4. Multi-Docker Container Application
+
+This task brought a lot of trouble and unexpected complications for us. Despite being largely based on the work already completed in previous tasks, one too many changes were required to create the python code containing file, a modified docker-compose and a Dockerfile, and make all three run together smoothly. We approached this task in the exact order suggested in the instructions.
+
+### Creating a docker-compose.yml file
+To start a PostgreSQL Server Docker container, we composed a separate docker-compose file based on the previous versions of our respective files with added functionality. Furthermore, we also made sure that the container with our python file was the last one to be built and run by making it dependent n the db:
+
+```
+version: '3.8'
+services:
+  db:
+    container_name: pg_container
+    image: postgres:14
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: postgres
+      PGDATA: /var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  pgadmin:
+    container_name: pgadmin4_container
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: 1234
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+
+  python:
+    build: .
+    depends_on:
+      - db
+###command: ["./wait-for-it.sh", "db:5432", "--", "python", "app.py"]
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/app
+
+volumes:
+  postgres_data:
+  pgadmin_data:
+```
+
+From here it is also evident that we have created and added respective volumes for postgres and pgadmin containers.
+
+### Writing a Python script
+This part was the trickiest for us, as despite its seemingly clear task list, the implementation and actual exercising of those requirements proved to be a lot more complicated than expected.
+First of all, we loaded and trained a model, tested it and then created a postgres database called "milestone_3". Then, a single sample was taken from the database and tested within the model, with the input data and the resulting prediction being put into respective tables, properly labeled and printed.
+In order for this code to be run together with the docker files, we needed to leave the three of them in the root folder, so that there is no conflict during containerization.
+
+```
+import psycopg2
+import numpy as np
+from tensorflow import keras
+import pickle
+from PIL import Image
+import os
+
+# connect to postgres db initalised by docker compose
+con = psycopg2.connect(
+    host="db",
+    database="postgres",
+    user="admin",
+    password="1234")
+
+# Turn off transaction mode and enable autocommit
+con.autocommit = True
+
+# Creat cursor
+cur = con.cursor()
+
+# Create new database 'milestone_3' if not existing y_test
+cur.execute('SELECT datname FROM pg_database;')
+db_list = cur.fetchall()
+
+if ('milestone_3',) not in db_list:
+
+    # create database milestone
+    cur.execute('CREATE DATABASE milestone_3')
+
+    # creating the input data table
+    cur.execute('''
+        CREATE TABLE input_data (
+        Input_ID int PRIMARY KEY
+            GENERATED ALWAYS AS IDENTITY,
+        Picture bytea,
+        Label int);
+        ''')
+
+    # creating the predictions table
+    cur.execute('''
+        CREATE TABLE predictions (
+        Prediction_ID int PRIMARY KEY
+            GENERATED ALWAYS AS IDENTITY,
+        Input_ID int
+            REFERENCES input_data(Input_ID),
+        prediction int);
+        ''')
+```
+
+In the first half of our code, we import all the necessary python modules for model training and database operation. We proceed by connecting to the postgres database initialised by the docker-compose file described above, and subsequently create a new database called "milestone_3", having previously checked if it doesn't already exist from our long list of tries and fails. Once the database is successfully created, we finish the setup by creating the required tables, i.e. for input data and predictions. The database has the following structure:
+
+![ERD](ERD.svg)
+
+```
+# import already existing module
+from data_load import load_data
+
+# load data
+x_train, y_train, x_test, y_test = load_data()
+
+# take first picture of training data as sample
+sample = x_train[0]
+sample_label = int(y_train[0])
+
+# Visualize picture
+Image.fromarray(sample).show()
+
+# Transform picture to byte stream
+sample_bytes = pickle.dumps(sample)
+
+# Insert picture to input table
+cur.execute(
+    """
+    INSERT INTO input_data (Picture, Label)
+    VALUES (%s, %s)
+    """,
+    (sample_bytes, sample_label))
+
+# Select transformed sample from input table and store it as python object
+cur.execute('SELECT Picture FROM input_data')
+sample_bytes_loaded = cur.fetchone()[0]
+
+# Select transformed sample from input table and store it as python object
+cur.execute('SELECT Input_ID FROM input_data')
+sample_ID = int(cur.fetchone()[0])
+
+# Retransform to object
+sample_back = pickle.loads(sample_bytes_loaded)
+
+# Visualize picture
+Image.fromarray(sample_back).show()
+
+# import model
+model_name = "mnist_convnet_model.h5"  # how the model shall be named
+model_save_dir = os.path.join(os.getcwd(), 'code/saved_models')  # relative path to save models in
+from handling_model import load_model
+model = load_model(model_save_dir, model_name)
+
+# transform data to be predicted
+sample_back = sample_back.astype("float32") / 255
+sample_back = np.expand_dims(sample_back, -1)
+sample_back_final = np.array([sample_back])  # Model expects shape (x, 28, 28, 1)
+
+# make predictions
+predictions = model.predict(sample_back_final)
+
+# final prediction
+final_pred = int(np.argmax(predictions[0]))
+
+# Insert predictions into table
+cur.execute(
+    """
+    INSERT INTO predictions (Input_Id, prediction)
+    VALUES (%s, %s)
+    """,
+    (sample_ID, final_pred))
+```
+
+In the last half of our code, we load the data from our already existing module, select our sample picture and transform it to byte stream in order for it to be processed, later retransforming it back into a sample object. Having completed that step and visualized the picture we got, we imported the model to "mnist_convnet_model.h5" file, which will also be dockerized.
+However, when we started transforming the data to be predicted, we ran into a problem with our selected sample - the model expected shape (x, 28, 28, 1), which would be possible to get only if we were testing the model on more than one sample units. Nonetheless, we decided to proceed with a single sample, since it was required by the instructions, and the model eventually worked with only one sample.
+Our final step was to insert the resulting predictions into our previously created predictions table.
+It is evident that a large part of this python file is based on our previous work, yet it can also be seen that this code required a lot of additions and changes to run properly. We tested everything by running the file outside the container and establishing the a connection via localhost. We detected several bugs in the code which we had to remove. Our final code looked as follows:
+
+```
+# laying out the basis from previous tasks and/or Milestones
+
+import psycopg2
+import numpy as np
+from tensorflow import keras
+import pickle
+from PIL import Image
+import os
+
+# connect to postgres db initalised by docker compose
+con = psycopg2.connect(
+    host="db",
+    port="5432",
+    database="postgres",
+    user="admin",
+    password="1234")
+
+# Turn off transaction mode and enable autocommit
+con.autocommit = True
+
+# Creat cursor
+cur = con.cursor()
+
+# Create new database 'milestone_3' if not existing y_test
+cur.execute('SELECT datname FROM pg_database;')
+db_list = cur.fetchall()
+
+if ('milestone_3',) not in db_list:
+
+    # create database milestone
+    cur.execute('CREATE DATABASE milestone_3')
+
+# Close connection
+con.close()
+
+# connect to postgres db initalised by docker compose
+con = psycopg2.connect(
+    host="db",
+    port="5432",
+    database="milestone_3",
+    user="admin",
+    password="1234")
+
+# Turn off transaction mode and enable autocommit
+con.autocommit = True
+
+# Creat cursor
+cur = con.cursor()
+
+# creating the input data table
+cur.execute('''
+    CREATE TABLE input_data (
+    InputID int PRIMARY KEY
+        GENERATED ALWAYS AS IDENTITY,
+    Picture bytea,
+    Label int);
+    ''')
+
+# creating the predictions table
+cur.execute('''
+    CREATE TABLE predictions (
+    PredictionID int PRIMARY KEY
+        GENERATED ALWAYS AS IDENTITY,
+    InputID int
+        REFERENCES input_data(InputID),
+    prediction int);
+    ''')
+
+# import already existing module
+from data_load import load_data
+
+# load data
+x_train, y_train, x_test, y_test = load_data()
+
+# take first picture of training data as sample
+sample = x_train[0]
+sample_label = int(y_train[0])
+
+# Visualize picture
+Image.fromarray(sample).show()
+
+# Transform picture to byte stream
+sample_bytes = pickle.dumps(sample)
+
+# Insert picture to input table
+cur.execute(
+    """
+    INSERT INTO input_data (Picture, Label)
+    VALUES (%s, %s)
+    """,
+    (sample_bytes, sample_label))
+
+# Select transformed sample from input table and store it as python object
+cur.execute('SELECT Picture FROM input_data')
+sample_bytes_loaded = cur.fetchone()[0]
+
+# Select transformed sample from input table and store it as python object
+cur.execute('SELECT InputID FROM input_data')
+sample_ID = int(cur.fetchone()[0])
+
+# Retransform to object
+sample_back = pickle.loads(sample_bytes_loaded)
+
+# Visualize picture
+Image.fromarray(sample_back).show()
+
+# import model
+model_name = "mnist_convnet_model.h5"  # how the model shall be named
+model_save_dir = os.path.join(os.getcwd(), 'saved_models')  # relative path to save models in
+from handling_model import load_model
+model = load_model(model_save_dir, model_name)
+
+# transform data to be predicted
+sample_back = sample_back.astype("float32") / 255
+sample_back = np.expand_dims(sample_back, -1)
+sample_back_final = np.array([sample_back])  # Model expects shape (x, 28, 28, 1)
+
+# make predictions
+predictions = model.predict(sample_back_final)
+
+# final prediction
+final_pred = int(np.argmax(predictions[0]))
+
+# Insert predictions into table
+cur.execute(
+    """
+    INSERT INTO predictions (InputID, prediction)
+    VALUES (%s, %s)
+    """,
+    (sample_ID, final_pred))
+```
+
+Last but not least our final goal was to create a container which would run this file as part of docker compose. We spent a lot of time in order to get it up and running but we had no success. We realized that our requirements file was not up to date so we could not import all the correct packages. We also struggled to find out how we can define a volume which would directly allow access to the python modules in our project folder. Eventually we found a solution. Our dockerfile looked like this:
+
+```
+FROM python:3.8
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+
+CMD python code/main.py
+CMD python code/Task4.py
+```
+
+Our docker-compose file:
+
+```
+version: '3.8'
+services:
+  db:
+    container_name: pg_container
+    image: postgres:14
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: postgres
+      PGDATA: /var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  pgadmin:
+    container_name: pgadmin4_container
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: 1234
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+
+  python:
+    build: .
+    depends_on:
+      - db
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/app
+
+volumes:
+  postgres_data:
+  pgadmin_data:
+```
+
+Before we ran the file we deleted all the old images and containers to build a completly new image and start new containers on this new image. Then we ran `docker-compose up` and logged in to pgAdmin we saw the new database with both tables and the sample data in it. So it worked. 
