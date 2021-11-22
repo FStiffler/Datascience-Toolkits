@@ -5,5 +5,4 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 
-CMD python code/main.py
 CMD python code/Task4.py

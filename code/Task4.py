@@ -6,6 +6,7 @@ from tensorflow import keras
 import pickle
 from PIL import Image
 import os
+import main
 
 # connect to postgres db initalised by docker compose
 con = psycopg2.connect(

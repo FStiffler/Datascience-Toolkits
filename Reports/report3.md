@@ -833,4 +833,7 @@ volumes:
   pgadmin_data:
 ```
 
-Before we ran the file we deleted all the old images and containers to build a completly new image and start new containers on this new image. Then we ran `docker-compose up` and logged in to pgAdmin we saw the new database with both tables and the sample data in it. So it worked. 
+Before we ran the file we deleted all the old images and containers to build a completly new image and start new containers on this new image. Then we ran `docker-compose up` and logged in to pgAdmin we saw the new database with both tables and the sample data in it. So it worked.
+
+**Addendum:**
+We had to make a hot fix after our initial release because we realized that we can not run two CMD in the same Dockerfile. However, the first CMD is used to create the h5 file by running the main.py file from Milestone2. The model stored to the h5 file is then loaded in the Task4.py file. We tested it by cloning the repo to a new directory, delete the docker image and run `docker-compose up`. We recognized that it was not working since the h5 was missing (because the firt CMD is overwritten by the second CMD). We decided to remove the first CMD from the dockerfile and added a line `import main` to the Task4.py file which causes main.py to run once entirely and thus to create the required h5 file in the background. The model can then be loaded directly in the Task4.py file. For that we created a new branch, added the mentioned changes, deleted the previous docker image and then ran `docker-compose up` again. This time everything worked as intended. We pushed the changes to the new branch and created another pull request. 
