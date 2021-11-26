@@ -3,6 +3,7 @@ venv/
 DTA_venv/
 .idea/
 __pycache__/
+wandb/
 
 # File types #
 *.h5

@@ -3,3 +3,4 @@ keras==2.6.0
 tensorflow==2.6.0
 matplotlib==3.4.3
 psycopg2-binary==2.9.2
+wandb==0.12.7
