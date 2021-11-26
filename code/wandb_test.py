@@ -9,7 +9,7 @@ num_classes = 10  # number of digits to be classified (for mnist dataset 10)
 input_shape = (28, 28, 1)
 
 # new run
-wandb.init(project="dbs", entity="fstiffler")
+wandb.init(project="dbs_container")
 
 # set configurations
 wandb.config = {

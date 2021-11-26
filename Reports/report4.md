@@ -20,7 +20,7 @@ The first step was to create an account on [Weights&Biases](https://wandb.ai/sit
 ## Task 2
 
 
-### Running a simple project without docker container
+### Instrument code without docker container
 
 we had a look at the [quickstart guide](https://wandb.ai/quickstart/keras) provided by Weights&Biases for Keras. The first step was to install the package `wandb`. So we activated our virtual environment and installed the package. We also added the file to package to the requirements file right away. The hashes were added to the requirements table in the README file. The next step was to login to `wandb`. To do that we typed `wandb login` into our terminal. There we had to add the API key which was found on our wandb account. That seemed to work without any problem. In a next step we created a `wandb.py` file in the same directory as the other code so that we could easily access already prepared modules for this task. We tried to follow the instructions online to import the required packages and modules but it did not work initially. We received an error message stating that wandb was not a package. It was just after that we realized, that this error occurred due to the file name `wandb.py`. So we changed the name to `wandb_test.py` and reran the file. We went to our wandb account and saw that first of all, a new project was initialized and that a run with a funny name was present. However, we still had some errors in our model which is why we had to adjust the code several times before we conducted our first successful run. We deleted all our unsuccessful runs right after that.
 
@@ -112,4 +112,42 @@ The accuracy of the test set evaluation was about 67%. This is not astonishing g
 
 We started a new run but this time we set the batch-size to 128 (which is the value often used to train neural networks) and epochs to 5. We hoped to see a massive improvement in accuracy doing that. This took some time to complete. After the run was completed, we checked out the result once again on our wandb account and saw that our accuracy has improved up to 98%. The loss was reduced to 0.06. The results from the previous run were also depicted in the charts of the second run which allowed a direct comparison. All in all, this were the results we were expecting and hoping for. The results can be viewed [here](https://wandb.ai/fstiffler/dbs?workspace=user-fstiffler).
 
-We recognized that all the runs were also logged locally in our working directory where the `wandb_test.py` file was. Running the file would create a directory `wandb` with log files of every run. So we had to add this directory to our gitignore file to prevent it from being tracked by git. 
+We recognized that all the runs were also logged locally in our working directory where the `wandb_test.py` file was. Running the file would create a directory `wandb` with log files of every run. So we had to add this directory to our gitignore file to prevent it from being tracked by git.
+
+### Instrument code with docker container
+
+Now that we had a code which allowed us to make test runs and track the model training with different parameters on W&B, we wanted to dockerize everything. The docker container has to login to W&B. For this purpose we created a .env file which contains our personal access key and is called `WANDB_TOKEN`. This file must never be tracked by git to prevent foreigners to access our account by looking at the key in the file. Therefore we added the .env to the gitignore file. Next up, we had to create an entrypoint script which is executed in the entrypoint of the docker container when the docker image is run. The script allows us to login to W%B before the actual CMD command in the docker file is executed. Therefore, we created the file `docker_entrypoint.sh` and inserted the proposed code in the milestone description:
+
+```
+#!/bin/bash
+
+set -e
+
+wandb login $WANDB_TOKEN
+
+exec "$@"
+```
+
+In a last step we had to create the docker file itself. For this purpose we adjusted the already existing docker file in our root folder. We decided to go back to a docker file solution in which we copy the modules into the container instead of mounting the working directory on the container (as we already did in milestone 2). We thought it was just easier to do when there is no additional docker compose file which would mount the current working directory to the container. We also had to define the ENTRYPOINT command. The docker file was the following:
+
+```
+FROM python:3.8
+
+WORKDIR /app
+
+COPY requirements.txt .
+COPY docker_entrypoint.sh .
+COPY code/*.py modules/
+
+RUN pip install -r requirements.txt
+
+ENTRYPOINT ["sh","docker_entrypoint.sh"]
+
+CMD python modules/wandb_test.py
+```
+
+Last but not least we made a small adjustment to our python file to be executed by the docker container. When we tested the python file before, we created a project called `dst` on W&B. To test the docker container we planned to create a new project `dst_container`. Hence, we adjusted the relevant line in our code. Now we were ready to build the image from the dockerfile with `docker build -t wandb:v1 .`. After that we had to run `docker run --name wandb --env-file=.env wandb:v1`. Because the batch size was still set to 128 and epochs to 5, running the container again took a while. But eventually everything worked. We logged in to W&B again to see if the project was created and all the metrics where tracked. Everything was there just like before. The dockerized project on W&B can be found [Here](https://wandb.ai/fstiffler/dbs_container). There was one last issue we realized just later. In the python file, Flurin defined `entity=fstiffler`. But if somebody else now tries to run the container, it will not work if she or he tries to connect to her or his own W&B account since the entity does not exist. Here the explanation from [W&B](https://docs.wandb.ai/ref/python/init):
+
+*'An entity is a username or team name where you're sending runs. This entity must exist before you can send runs there, so make sure to create your account or team in the UI before starting to log runs. If you don't specify an entity, the run will be sent to your default entity, which is usually your username.'*
+
+ So we removed this piece of code and rebuild the container with `docker build -t wandb:v2 .` and `docker run --name wandb --env-file=.env wandb:v2`. Visiting our account on W&B once again we saw, that everything worked fine again and the user was just the defined default user. With that, we successfully finished Task 2. 

@@ -7,3 +7,4 @@ wandb/
 
 # File types #
 *.h5
+.env
