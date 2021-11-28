@@ -8,14 +8,28 @@ The first step was to create an account on [Weights&Biases](https://wandb.ai/sit
 
 **1. What is Experiment Management and why is it important?**
 
+Experiment Management is a solution to the problem of increasing complexity and volume of operated data in various projects, especially in Machine Learning. Therefore, with more and more tasks completed the rapidly growing number of experiment data, hyperparameters, datasets etc is getting harder to track and manage, so EM comes in handy to tackle this issue.
+
+EM is used to track all the experiments that have been completed in order not to lose knowledge, preserve efficient management of resources, and avoid time waste. Those experiments usually come in a 5-step process, i.e. hypothesis formulation, variable definition, trainig dataset and parameter tracking, trial creation and training launch, and finally result analysis. After completing the experiment (or a whole range of those), EM can also be used for knowledge sharing, as others (team members, colleagues etc) may need to reproduce one's own experiments.
+In the case with Machine Learning, where experiments are designed, to navigate the huge space of possible experiments with hundreds of parameters, it is important to resort to Experiment Management.
+
 **2. What is a Metric in ML?**
+
+In ML, the summarized outcome in a single or a couple of numbers is called a Metric. It is primarily used for comparing experiment outcomes, measuring and monitoring the performance of a particular model. For ML, however, for comparative measurement of accuracy, precision etc of the outcome, depends also on the Metric chosen for usage, i.e. one ML model can get different measurement results depending on the Metric applied.
 
 **3. What is Precision and Recall? Why is there often a Trade-off between them?**
 
+Precision and Recall are both the Metrics used in ML, where Precision is a measure of proportion of the tests classified correctly of all positively classified ones. Basically, this is the measure of how to-the-point the model's calculations appeared to be. Recall is another Metric that describes the opposite of Precision, i.e. the percentage of incorrectly classified cases of all actual positive test cases.
+Therefore, given the information just provided, it is evident that some kind of a tradeoff must exist between the two, as they are in a way mutually excluding. If one was wishing to focus on minimization of False Negatives, one would get higher levels of Recall while keeping their Precision levels lower. Vice versa, if one were willing to aim at keeping Precision levels at their highest, one would have to agree to having their Recall level low (albeit not too bad), thus minimizing False Positives.
+
+
 **4. What is AUROC Metric?**
+
+AUROC is the acronym that stands for Area Under Receiver Operating Characteristic Curve, and includes both the AUC and ROC terms within, where the ROC is a probability curve, and AUC represents the degree of separability. It is a performance measurement metric that shows how well the given model is working with classification problems at various threshold settings. The higher the ROC curve is, the better the model is at predicting classes; the better the model, the smaller the shared area of both distributions becomes. Overall, the main purpose of the AUROC metric is to tell about the model's ability to discriminate between positive cases and negative non-cases. The closer AUROC gets to 1, the better discriminatory ability the model has.
 
 **5. What is a Confusion Matrix?**
 
+Confusion Matrix is a popular visualization method and/or metric of prediction inside a classification problem, where the output can be of two or more classes, giving the matrix an actual output and describes the performance of the model. The easiest example would be the binary CM with True/False Positives and True/False Negatives, where the ideal model should produce O False Negatives and Positives, yet such a result in real life is unattainable, as no model can reach 100% accuracy all the time.
 
 ## Task 2
 
@@ -150,4 +164,4 @@ Last but not least we made a small adjustment to our python file to be executed 
 
 *'An entity is a username or team name where you're sending runs. This entity must exist before you can send runs there, so make sure to create your account or team in the UI before starting to log runs. If you don't specify an entity, the run will be sent to your default entity, which is usually your username.'*
 
- So we removed this piece of code and rebuild the container with `docker build -t wandb:v2 .` and `docker run --name wandb --env-file=.env wandb:v2`. Visiting our account on W&B once again we saw, that everything worked fine again and the user was just the defined default user. With that, we successfully finished Task 2. 
+ So we removed this piece of code and rebuild the container with `docker build -t wandb:v2 .` and `docker run --name wandb --env-file=.env wandb:v2`. Visiting our account on W&B once again we saw, that everything worked fine again and the user was just the defined default user. With that, we successfully finished Task 2.
