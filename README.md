@@ -215,3 +215,7 @@ psycopg-binary==3.0.4 \
 wandb==0.12.7 \
     --hash=sha256:92e5a89e681cfffe70b31c0645f6ca20668d3211951a1db01a39687ca39e05f4 \
     --hash=sha256:d1c2a6cd3fc57b5a75ff18d4bb69f088d0bd1d0ad22c98005a37e037c85442c7
+
+notebook==6.4.6 \
+    --hash=sha256:5cad068fa82cd4fb98d341c052100ed50cd69fbfb4118cb9b8ab5a346ef27551 \
+    --hash=sha256:7bcdf79bd1cda534735bd9830d2cbedab4ee34d8fe1df6e7b946b3aab0902ba3
