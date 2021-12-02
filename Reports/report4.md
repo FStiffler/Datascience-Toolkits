@@ -164,4 +164,8 @@ Last but not least we made a small adjustment to our python file to be executed 
 
 *'An entity is a username or team name where you're sending runs. This entity must exist before you can send runs there, so make sure to create your account or team in the UI before starting to log runs. If you don't specify an entity, the run will be sent to your default entity, which is usually your username.'*
 
- So we removed this piece of code and rebuild the container with `docker build -t wandb:v2 .` and `docker run --name wandb --env-file=.env wandb:v2`. Visiting our account on W&B once again we saw, that everything worked fine again and the user was just the defined default user. With that, we successfully finished Task 2.
+So we removed this piece of code and rebuild the container with `docker build -t wandb:v2 .` and `docker run --name wandb --env-file=.env wandb:v2`. Visiting our account on W&B once again we saw, that everything worked fine again and the user was just the defined default user. With that, we successfully finished Task 2.
+
+## Task 3
+
+In order to even create a jupyter notebook in the first place, we had to install the notebook library. Accordingly, we activated our virtual environment and ran the command `pip install notebook`. After that, we simply had to type `jupyter notebook` into the terminal. This command opened up a browser window running on the localhost address. The window showed all the files in the local working directory from which the jupyter notebook command was executed. There was also a button to create a new notebook which we did. We saved the notebook `data_analysis.ipynb`. We commented all the analyses in the notebook directly. We realized that the creation of jupyter notebooks initiates a new working directory `.ipynb_checkpoints` which is tracked by by git. So we had to extend our gitignore file once more. 

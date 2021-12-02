@@ -4,6 +4,7 @@ DTA_venv/
 .idea/
 __pycache__/
 wandb/
+.ipynb_checkpoints/
 
 # File types #
 *.h5
