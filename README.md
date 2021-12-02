@@ -80,6 +80,9 @@ In this project we had to create a release that would contain our dockerized cod
 To connect our containers to each other via a network and make them run in a specific order first and then simultaneously, we created a specific docker-compose file and a modified Dockerfile, dealing with Postgres database and our own created db.
 Having created a database in a docker-compose file, we initialized a table in a python code and ran a joke-storing code in there. After this practice, we could proceed to retrace these steps with our original trained model. This relational database we created allowed us to store both input and prediction data of our model into itself with the help of Docker compose and the postgres. Several additional modules and libraries were also used to this aim.
 
+### Milestone 4
+In this milestone we had get familiar with experiments. After answering some theoretical questions about experiments and related key words, we had to start with our own experiment. The goal was to create a docker container which would allow us to test models with different configurations and track everything in our accounts on Weights&Biases. Running the container should automatically start the tracking of relevant parameters and create plots visible on our account. The last step was to take the best model based on our experiments and proceed with an analysis of the data fed into the model and the model output. The data analysis was to be done in a jupyter notebook. 
+
 ## Requirements
 
 ### Python packages (including hashes)
@@ -219,3 +222,6 @@ wandb==0.12.7 \
 notebook==6.4.6 \
     --hash=sha256:5cad068fa82cd4fb98d341c052100ed50cd69fbfb4118cb9b8ab5a346ef27551 \
     --hash=sha256:7bcdf79bd1cda534735bd9830d2cbedab4ee34d8fe1df6e7b946b3aab0902ba3
+
+sklearn==0.0 \
+    --hash=sha256:e23001573aa194b834122d2b9562459bf5ae494a2d59ca6b8aa22c85a44c0e31
