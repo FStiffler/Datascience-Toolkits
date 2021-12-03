@@ -75,6 +75,14 @@ Our next step was to create the **requirements.txt** file and download all the r
 
 Lastly, we got acquainted with Docker, having installed and set it up on our machines. Although not without extra issues, we managed to create our images and make it run our code.
 
+### Milestone 3
+In this project we had to create a release that would contain our dockerized code within a running database postgres server. Furthermore, that database was supposed to contain newly created and filled in tables for both input data and the resulting predictions from our chosen input sample.
+To connect our containers to each other via a network and make them run in a specific order first and then simultaneously, we created a specific docker-compose file and a modified Dockerfile, dealing with Postgres database and our own created db.
+Having created a database in a docker-compose file, we initialized a table in a python code and ran a joke-storing code in there. After this practice, we could proceed to retrace these steps with our original trained model. This relational database we created allowed us to store both input and prediction data of our model into itself with the help of Docker compose and the postgres. Several additional modules and libraries were also used to this aim.
+
+### Milestone 4
+In this milestone we had get familiar with experiments. After answering some theoretical questions about experiments and related key words, we had to start with our own experiment. The goal was to create a docker container which would allow us to test models with different configurations and track everything in our accounts on Weights&Biases. Running the container should automatically start the tracking of relevant parameters and create plots visible on our account. The last step was to take the best model based on our experiments and proceed with an analysis of the data fed into the model and the model output. The data analysis was to be done in a jupyter notebook. 
+
 ## Requirements
 
 ### Python packages (including hashes)
@@ -155,60 +163,65 @@ matplotlib==3.4.3 \
     --hash=sha256:fc4f526dfdb31c9bd6b8ca06bf9fab663ca12f3ec9cdf4496fb44bc680140318 \
     --hash=sha256:fcd6f1954943c0c192bfbebbac263f839d7055409f1173f80d8b11a224d236da
 
-    psycopg-binary==3.0.4 \
-        --hash=sha256:044150427cf2763a1718cba1a2db845d9939fcfb37a26d711c696a884ebe3fdd \
-        --hash=sha256:0b4565d3d084094ff13a09019e2cfdba4ba4d4bc7482e6cac030b6fc7bdeed15 \
-        --hash=sha256:18fbb1a64b64a3fd8805f9983c0d1d0a8564b586b9f6c4eeff6301f5fc1085fa \
-        --hash=sha256:1959c67cf9344881951fd4d14e734187c7a9821fdeffddb00595a423da6555e6 \
-        --hash=sha256:1c279b821b7bc0737a7968400cba13b23abbd784647fe05842a76c8aa2793db1 \
-        --hash=sha256:222efc3871f8e2388c2230e3019c82801f3fe7baf914a2fcd74a2667f7992f9d \
-        --hash=sha256:2a108434e58adfc0aaecfe738827330a4faba739ed1354158b8bfc027731d136 \
-        --hash=sha256:35d68cb45d68c6dfb6274b7d4d9bfcb0b0e154765e9936fa221164de57cdc22e \
-        --hash=sha256:36c1e97950dc3d34ba899af1e0d01360430157c9eab6e4831f1da83ad9c96262 \
-        --hash=sha256:3a3ae5e28ba5f22fc4ea575ee85f57c308e18392f61d0a760558bec7729b05ad \
-        --hash=sha256:3a526c9117f5447492dabaf85e28734ea9cce2f72743be07f7efb735356a2364 \
-        --hash=sha256:3cc455ea6d2ce91fc68f890aff75ad869bdc68a97ca7b72c4a31f8639bea38b0 \
-        --hash=sha256:41e27f04c1dbf604ce9f2bf09ad721df94ca9f1495f88b8950b11610709ef926 \
-        --hash=sha256:48440b8af7e556290e88cd0a5606d7603ce33a901b0b630c20ee4d81924a5798 \
-        --hash=sha256:4a30e4cdf39e2d9c9e1e39c71af1475c10c558c8b0da5c0e310e5aea81c8cf83 \
-        --hash=sha256:522650e62a9f579472dcd6c425f6628958770f3f323c4cc9e0302398b81da5a6 \
-        --hash=sha256:524f39f247683b081271808122787600c71e81c518dd71732b53d58225525c0b \
-        --hash=sha256:52f767889c907177c1341beac0d40bfef9df4534f4957b99da89c8064871fda8 \
-        --hash=sha256:54ccab9000606e6d663db3da545d4674e80a3b3bfb6955156ed2485db9f1c670 \
-        --hash=sha256:572afd7ae204162cea4fd559023e018ad13b94747682469cee5c7d0d7e7b9af0 \
-        --hash=sha256:5e3807c78aa8f252b0c16c4f00f38c299cdcc05ca111ea8c425ece15de3b92b1 \
-        --hash=sha256:61ba6ae37147406e2df98d6d67a2a403779d68941b40f5dddfc983db048ac034 \
-        --hash=sha256:649e298b9d50e9d157bc051b0e661502b56e72c52992356316035b1b9f03de55 \
-        --hash=sha256:697fd1f9fa4bac31f9601c1a87ab6b0a7c824d109b513713d0bda4e5f879182b \
-        --hash=sha256:6b0c931f7fe17da5197c90ba8023c791f50b35c4569c0801a20b54cb4ed76b41 \
-        --hash=sha256:70a80a7385449374d780ff9a80a21abfb43b2da7d88a7206c48fe7c692d2adea \
-        --hash=sha256:73cbec7a22584777fd0eb60461ea27b8856358be69e042e44f83a4baff1149f3 \
-        --hash=sha256:8065e5e7ca6b6929b519928dbc3ba2961235e77a87fe48aab1ef3560def4aaf3 \
-        --hash=sha256:83bbadee16718ea833e52871af0d634788482849639cdae4bc825ee98fe5385e \
-        --hash=sha256:88622be841d8a7e1140470f5d011551a34e4c5597fa48460d611e22d0a5dd176 \
-        --hash=sha256:89b0075fa1172e78d3f0a4841011da721a736d1620b56ab53174a4dcf61cdd9d \
-        --hash=sha256:8afd176032b4564e290c5ccefdc1bb072ee709acf96222c3e47273ed96cd21a7 \
-        --hash=sha256:9c04818bc28f007ecacde1f82e4d8cdbf55afb0e5e658559d5124b7c25ad4a8f \
-        --hash=sha256:9eba561a14b547a900eab9adaee84cb2173f6878c4d70206c120f86b06938eaf \
-        --hash=sha256:a3541abbdbd63fc0cbdb2edcbc457e96d92163648230f646e8a02cbda7af0018 \
-        --hash=sha256:a5109c246a7c4978ae5e3439233e2fc26c224b5911efe86a14bc13705fad8c15 \
-        --hash=sha256:a6d67d589c59af4a6d4d4a6f0bb09d052c8cb5ba4020111a04961e806518a807 \
-        --hash=sha256:b04d05cb2daa368b9bb351dfea2a0ed0a986db3a1bc3c2392d632ec046a69302 \
-        --hash=sha256:b5f3528343311033bccea371f2374c2f7234815fcf37b65d2bbacce5b922cde3 \
-        --hash=sha256:b9a574f6fbf7be17f1d992cc9c25daf4ce61354885443febefeeae33bdbafdb5 \
-        --hash=sha256:bee116a8bda4d3a3730262e6e52a6a045027af7280e7dcdd49d521303e601663 \
-        --hash=sha256:bfab7e0f72be66b190600c006a583d22036a4d1da6b7a62c811855e69b81ec1a \
-        --hash=sha256:cd27fb95b49acb2bc52ab26f84de0a46600cba801eeec9d9d0ec8e29eda377fd \
-        --hash=sha256:d58716c4d3d8f7a9930e88b9d0f40ad9bffe80159a6153677ebb9b3867b360df \
-        --hash=sha256:d9f6a7ff3b91066e7d30576a1edb0fe1e7aeb4d46f508e5352f7a57f2f89488b \
-        --hash=sha256:db2d491988ef4374ea1205b6cf03abff1f3a3d64e27f07b2d34fd28f2b5077e7 \
-        --hash=sha256:dbeec30fd538463b506c5124f24deff757dccb32f9d699fda6d3e187827d26c6 \
-        --hash=sha256:e322a68df29c2bfde411c7cd8ff605b5d1664b7e477b7632a5903c719305474c \
-        --hash=sha256:f361bb6166bafba2ebef3658a0511cf2f4018d698092a3e39f2c61bd6fb1039b \
-        --hash=sha256:f703037f4833568fb60ba6157bbf0b447381c6c0d8a27cbd9841009220a9dca4
+psycopg-binary==3.0.4 \
+    --hash=sha256:044150427cf2763a1718cba1a2db845d9939fcfb37a26d711c696a884ebe3fdd \
+    --hash=sha256:0b4565d3d084094ff13a09019e2cfdba4ba4d4bc7482e6cac030b6fc7bdeed15 \
+    --hash=sha256:18fbb1a64b64a3fd8805f9983c0d1d0a8564b586b9f6c4eeff6301f5fc1085fa \
+    --hash=sha256:1959c67cf9344881951fd4d14e734187c7a9821fdeffddb00595a423da6555e6 \
+    --hash=sha256:1c279b821b7bc0737a7968400cba13b23abbd784647fe05842a76c8aa2793db1 \
+    --hash=sha256:222efc3871f8e2388c2230e3019c82801f3fe7baf914a2fcd74a2667f7992f9d \
+    --hash=sha256:2a108434e58adfc0aaecfe738827330a4faba739ed1354158b8bfc027731d136 \
+    --hash=sha256:35d68cb45d68c6dfb6274b7d4d9bfcb0b0e154765e9936fa221164de57cdc22e \
+    --hash=sha256:36c1e97950dc3d34ba899af1e0d01360430157c9eab6e4831f1da83ad9c96262 \
+    --hash=sha256:3a3ae5e28ba5f22fc4ea575ee85f57c308e18392f61d0a760558bec7729b05ad \
+    --hash=sha256:3a526c9117f5447492dabaf85e28734ea9cce2f72743be07f7efb735356a2364 \
+    --hash=sha256:3cc455ea6d2ce91fc68f890aff75ad869bdc68a97ca7b72c4a31f8639bea38b0 \
+    --hash=sha256:41e27f04c1dbf604ce9f2bf09ad721df94ca9f1495f88b8950b11610709ef926 \
+    --hash=sha256:48440b8af7e556290e88cd0a5606d7603ce33a901b0b630c20ee4d81924a5798 \
+    --hash=sha256:4a30e4cdf39e2d9c9e1e39c71af1475c10c558c8b0da5c0e310e5aea81c8cf83 \
+    --hash=sha256:522650e62a9f579472dcd6c425f6628958770f3f323c4cc9e0302398b81da5a6 \
+    --hash=sha256:524f39f247683b081271808122787600c71e81c518dd71732b53d58225525c0b \
+    --hash=sha256:52f767889c907177c1341beac0d40bfef9df4534f4957b99da89c8064871fda8 \
+    --hash=sha256:54ccab9000606e6d663db3da545d4674e80a3b3bfb6955156ed2485db9f1c670 \
+    --hash=sha256:572afd7ae204162cea4fd559023e018ad13b94747682469cee5c7d0d7e7b9af0 \
+    --hash=sha256:5e3807c78aa8f252b0c16c4f00f38c299cdcc05ca111ea8c425ece15de3b92b1 \
+    --hash=sha256:61ba6ae37147406e2df98d6d67a2a403779d68941b40f5dddfc983db048ac034 \
+    --hash=sha256:649e298b9d50e9d157bc051b0e661502b56e72c52992356316035b1b9f03de55 \
+    --hash=sha256:697fd1f9fa4bac31f9601c1a87ab6b0a7c824d109b513713d0bda4e5f879182b \
+    --hash=sha256:6b0c931f7fe17da5197c90ba8023c791f50b35c4569c0801a20b54cb4ed76b41 \
+    --hash=sha256:70a80a7385449374d780ff9a80a21abfb43b2da7d88a7206c48fe7c692d2adea \
+    --hash=sha256:73cbec7a22584777fd0eb60461ea27b8856358be69e042e44f83a4baff1149f3 \
+    --hash=sha256:8065e5e7ca6b6929b519928dbc3ba2961235e77a87fe48aab1ef3560def4aaf3 \
+    --hash=sha256:83bbadee16718ea833e52871af0d634788482849639cdae4bc825ee98fe5385e \
+    --hash=sha256:88622be841d8a7e1140470f5d011551a34e4c5597fa48460d611e22d0a5dd176 \
+    --hash=sha256:89b0075fa1172e78d3f0a4841011da721a736d1620b56ab53174a4dcf61cdd9d \
+    --hash=sha256:8afd176032b4564e290c5ccefdc1bb072ee709acf96222c3e47273ed96cd21a7 \
+    --hash=sha256:9c04818bc28f007ecacde1f82e4d8cdbf55afb0e5e658559d5124b7c25ad4a8f \
+    --hash=sha256:9eba561a14b547a900eab9adaee84cb2173f6878c4d70206c120f86b06938eaf \
+    --hash=sha256:a3541abbdbd63fc0cbdb2edcbc457e96d92163648230f646e8a02cbda7af0018 \
+    --hash=sha256:a5109c246a7c4978ae5e3439233e2fc26c224b5911efe86a14bc13705fad8c15 \
+    --hash=sha256:a6d67d589c59af4a6d4d4a6f0bb09d052c8cb5ba4020111a04961e806518a807 \
+    --hash=sha256:b04d05cb2daa368b9bb351dfea2a0ed0a986db3a1bc3c2392d632ec046a69302 \
+    --hash=sha256:b5f3528343311033bccea371f2374c2f7234815fcf37b65d2bbacce5b922cde3 \
+    --hash=sha256:b9a574f6fbf7be17f1d992cc9c25daf4ce61354885443febefeeae33bdbafdb5 \
+    --hash=sha256:bee116a8bda4d3a3730262e6e52a6a045027af7280e7dcdd49d521303e601663 \
+    --hash=sha256:bfab7e0f72be66b190600c006a583d22036a4d1da6b7a62c811855e69b81ec1a \
+    --hash=sha256:cd27fb95b49acb2bc52ab26f84de0a46600cba801eeec9d9d0ec8e29eda377fd \
+    --hash=sha256:d58716c4d3d8f7a9930e88b9d0f40ad9bffe80159a6153677ebb9b3867b360df \
+    --hash=sha256:d9f6a7ff3b91066e7d30576a1edb0fe1e7aeb4d46f508e5352f7a57f2f89488b \
+    --hash=sha256:db2d491988ef4374ea1205b6cf03abff1f3a3d64e27f07b2d34fd28f2b5077e7 \
+    --hash=sha256:dbeec30fd538463b506c5124f24deff757dccb32f9d699fda6d3e187827d26c6 \
+    --hash=sha256:e322a68df29c2bfde411c7cd8ff605b5d1664b7e477b7632a5903c719305474c \
+    --hash=sha256:f361bb6166bafba2ebef3658a0511cf2f4018d698092a3e39f2c61bd6fb1039b \
+    --hash=sha256:f703037f4833568fb60ba6157bbf0b447381c6c0d8a27cbd9841009220a9dca4
 
+wandb==0.12.7 \
+    --hash=sha256:92e5a89e681cfffe70b31c0645f6ca20668d3211951a1db01a39687ca39e05f4 \
+    --hash=sha256:d1c2a6cd3fc57b5a75ff18d4bb69f088d0bd1d0ad22c98005a37e037c85442c7
 
-### Milestone 3
-In this project we had to create a release that would contain our dockerized code within a running database postgres server. Furthermore, that database was supposed to contain newly created and filled in tables for both input data and the resulting predictions from our chosen input sample.
-To connect our containers to each other via a network and make them run in a specific order first and then simultaneously, we created a specific docker-compose file and a modified Dockerfile, dealing with Postgres database and our own created db.
-Having created a database in a docker-compose file, we initialized a table in a python code and ran a joke-storing code in there. After this practice, we could proceed to retrace these steps with our original trained model. This relational database we created allowed us to store both input and prediction data of our model into itself with the help of Docker compose and the postgres. Several additional modules and libraries were also used to this aim.
+notebook==6.4.6 \
+    --hash=sha256:5cad068fa82cd4fb98d341c052100ed50cd69fbfb4118cb9b8ab5a346ef27551 \
+    --hash=sha256:7bcdf79bd1cda534735bd9830d2cbedab4ee34d8fe1df6e7b946b3aab0902ba3
+
+sklearn==0.0 \
+    --hash=sha256:e23001573aa194b834122d2b9562459bf5ae494a2d59ca6b8aa22c85a44c0e31
