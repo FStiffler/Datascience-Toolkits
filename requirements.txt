@@ -6,3 +6,4 @@ psycopg2-binary==2.9.2
 wandb==0.12.7
 notebook==6.4.6
 sklearn==0.0
+Flask==2.0.2
