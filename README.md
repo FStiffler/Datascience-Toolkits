@@ -83,6 +83,9 @@ Having created a database in a docker-compose file, we initialized a table in a 
 ### Milestone 4
 In this milestone we had get familiar with experiments. After answering some theoretical questions about experiments and related key words, we had to start with our own experiment. The goal was to create a docker container which would allow us to test models with different configurations and track everything in our accounts on Weights&Biases. Running the container should automatically start the tracking of relevant parameters and create plots visible on our account. The last step was to take the best model based on our experiments and proceed with an analysis of the data fed into the model and the model output. The data analysis was to be done in a jupyter notebook.
 
+### Milestone 5
+In this milestone we had get familiar with flask first. The goal was to create a web application with flask which would accept a POST request from a user with a MNIST picture in the request body and which would return a classification for the picture. The application makes use of the modules and docker files used in previous milestones. Additionally it stores the image as well as the prediction in a database. In a last step we had to dockerized everything so that the database and the application both run in different containers which communicate with each other. 
+
 ## Requirements
 
 ### Python packages (including hashes)
