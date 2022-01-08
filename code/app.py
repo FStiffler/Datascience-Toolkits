@@ -1,7 +1,6 @@
 from flask import Flask, jsonify, request
 import os
 import numpy as np
-import main
 from handling_model import load_model
 from db import create_table, save_predictions
 
@@ -9,8 +8,17 @@ from db import create_table, save_predictions
 model_name = "mnist_convnet_model.h5"  # how the model shall be named
 model_save_dir = os.path.join(os.getcwd(), 'saved_models')  # relative path to save models in
 
-# Load model
-model = load_model(model_save_dir, model_name)
+# Check if model already exists
+if os.path.isfile(os.path.join(model_save_dir,model_name)):
+
+    # Load model
+    model = load_model(model_save_dir, model_name)
+
+else:
+
+    # Train and import model
+    import main
+
 
 # Create tables in sql database only if it does not already exist
 try:
@@ -51,4 +59,4 @@ def get_prediction():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000)
