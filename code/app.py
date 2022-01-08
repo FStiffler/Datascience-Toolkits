@@ -16,8 +16,11 @@ if os.path.isfile(os.path.join(model_save_dir,model_name)):
 
 else:
 
-    # Train and import model
+    # Train model
     import main
+
+    # Load model
+    model = load_model(model_save_dir, model_name)
 
 
 # Create tables in sql database only if it does not already exist
