@@ -6,7 +6,7 @@ def create_table():
 
     # connect to postgres db initalised by docker compose
     con = psycopg2.connect(
-        host="localhost",
+        host="db",
         port="5432",
         database="postgres",
         user="admin",
@@ -34,7 +34,7 @@ def save_predictions(input_image, prediction):
 
     # connect to postgres db initalised by docker compose
     con = psycopg2.connect(
-        host="localhost",
+        host="db",
         port="5432",
         database="postgres",
         user="admin",

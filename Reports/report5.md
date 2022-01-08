@@ -264,4 +264,66 @@ if __name__ == "__main__":
 
 ```
 
-As you can see, the application first imports all necessary libraries and modules, loads the model, creates database tables if they are not there yet and then creates two endpoints. The first endpoint contains information about how to send a request. The second endpoint receives a POST request with a picture, makes a prediction, stores the picture and the prediction in a database and returns the prediction to the user. 
+As you can see, the application first imports all necessary libraries and modules, loads the model, creates database tables if they are not there yet and then creates two endpoints. The first endpoint contains information about how to send a request. The second endpoint receives a POST request with a picture, makes a prediction, stores the picture and the prediction in a database and returns the prediction to the user.
+
+**4. Dockerize code**
+
+Now that we can run our application on a webserver and send requests to it, we had to dokerize our code. For that we used the docker compose and docker file from milestone 3 as templates. The docker compose file already runs pgadmin and postgressql on our localhost and we can interact with the database this way. Docker compose also builds an image based on the instructions in our dokerfile. The image build allows for the creation of a container which runs the flask application also on localhost but on a different port. In order for the application being able to access all the ressources, we just mounted the current working directory as volume to the container. Additionally, we had to make sure that the model to be loaded already exists when we run the application. But this requires the `main.py` file to be executed at least once when the container is created. The model is not uploaded to github and as soon as somebody tries to clone our repository and import the model it won't exist and running the application will fail. Thus, we adjusted the application file a little bit to run the main module before everything else. This will create the model inside the container and makes it available to the user for requests. Additionally, we had to adjust the `db.py` file a bit. Since the database is initialized in a docker container by docker compose, we can define the respective docker compose service as host to connect to the database. Here is how our final docker compose file looked like:
+
+```
+version: '3.8'
+services:
+  db:
+    container_name: pg_container
+    image: postgres:14
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: postgres
+      PGDATA: /var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  pgadmin:
+    container_name: pgadmin4_container
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: 1234
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+
+  web:
+    build: .
+    depends_on:
+      - db
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/app
+
+volumes:
+  postgres_data:
+  pgadmin_data:
+
+```
+
+And here our dokerfile:
+
+```
+FROM python:3.8
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+
+CMD python code/app.py
+
+```

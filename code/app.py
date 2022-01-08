@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, request
 import os
 import numpy as np
+import main
 from handling_model import load_model
 from db import create_table, save_predictions
 

@@ -26,7 +26,7 @@ services:
     volumes:
       - pgadmin_data:/var/lib/pgadmin
 
-  python:
+  web:
     build: .
     depends_on:
       - db
