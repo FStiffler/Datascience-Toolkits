@@ -65,7 +65,7 @@ $ python3 mnist_convnet.py
 
 A more detailed report on milestone 1 can be found [here](Reports/report1.md)
 
-## Milestone 2
+### Milestone 2
 
 In the second milestone, we got acquainted with Docker, set up the necessary model training files and actually trained the neural network.
 
@@ -81,7 +81,10 @@ To connect our containers to each other via a network and make them run in a spe
 Having created a database in a docker-compose file, we initialized a table in a python code and ran a joke-storing code in there. After this practice, we could proceed to retrace these steps with our original trained model. This relational database we created allowed us to store both input and prediction data of our model into itself with the help of Docker compose and the postgres. Several additional modules and libraries were also used to this aim.
 
 ### Milestone 4
-In this milestone we had get familiar with experiments. After answering some theoretical questions about experiments and related key words, we had to start with our own experiment. The goal was to create a docker container which would allow us to test models with different configurations and track everything in our accounts on Weights&Biases. Running the container should automatically start the tracking of relevant parameters and create plots visible on our account. The last step was to take the best model based on our experiments and proceed with an analysis of the data fed into the model and the model output. The data analysis was to be done in a jupyter notebook. 
+In this milestone we had get familiar with experiments. After answering some theoretical questions about experiments and related key words, we had to start with our own experiment. The goal was to create a docker container which would allow us to test models with different configurations and track everything in our accounts on Weights&Biases. Running the container should automatically start the tracking of relevant parameters and create plots visible on our account. The last step was to take the best model based on our experiments and proceed with an analysis of the data fed into the model and the model output. The data analysis was to be done in a jupyter notebook.
+
+### Milestone 5
+In this milestone we had get familiar with flask first. The goal was to create a web application with flask which would accept a POST request from a user with a MNIST picture in the request body and which would return a classification for the picture. The application makes use of the modules and docker files used in previous milestones. Additionally it stores the image as well as the prediction in a database. In a last step we had to dockerized everything so that the database and the application both run in different containers which communicate with each other. 
 
 ## Requirements
 
@@ -225,3 +228,7 @@ notebook==6.4.6 \
 
 sklearn==0.0 \
     --hash=sha256:e23001573aa194b834122d2b9562459bf5ae494a2d59ca6b8aa22c85a44c0e31
+
+Flask==2.0.2 \
+    --hash=sha256:7b2fb8e934ddd50731893bdcdb00fc8c0315916f9fcd50d22c7cc1a95ab634e2 \
+    --hash=sha256:cb90f62f1d8e4dc4621f52106613488b5ba826b2e1e10a33eac92f723093ab6a

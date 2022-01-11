@@ -4,8 +4,8 @@ import os
 # define all parameters for following steps
 num_classes = 10  # number of digits to be classified (for mnist dataset 10)
 input_shape = (28, 28, 1)
-batch_size = 1000
-epochs = 1
+batch_size = 128
+epochs = 5
 model_name = "mnist_convnet_model.h5"  # how the model shall be named
 model_save_dir = os.path.join(os.getcwd(), 'saved_models')  # relative path to save models in
 eval_number = 5  # number of pictures to be shown to evaluate success of predictions
@@ -37,6 +37,3 @@ model = load_model(model_save_dir, model_name)
 # make predictions based on model and test set and evaluate predictions
 from predictions import predictions
 predictions = predictions(model, x_test, eval_number)
-
-
-
